@@ -22,7 +22,7 @@ class UserOptions:
                     "bars": [
                         {
                             "alignment": "bottom",
-                            "floating_bar": True,
+                            "floating_bar": False,
                             "floating_applets": True,
                             "rounded_edges": True,
                             "min_width": False,
@@ -52,7 +52,7 @@ class UserOptions:
                     "bars": [
                         {
                             "alignment": "bottom",
-                            "floating_bar": True,
+                            "floating_bar": False,
                             "floating_applets": True,
                             "rounded_edges": True,
                             "min_width": False,
