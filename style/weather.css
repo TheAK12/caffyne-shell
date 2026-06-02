@@ -1,0 +1,63 @@
+.weather-main {
+    background-color: var(--surface_container);
+    padding: 19px;
+    border-radius: apply(radius-m);
+}
+
+.hourly-item {
+    padding: 0px 8px;
+}
+
+.hourly-time {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.hourly-temp {
+    font-size: 14px;
+}
+
+.temp-bar-range {
+    background-color: var(--primary);
+    min-height: 6px;
+    border-radius: 8px;
+}
+
+.temp-bar {
+    min-height: 6px;
+    border-radius: 8px;
+    background-color: alpha(var(--primary), 0.2);
+}
+
+.daily-day {
+    font-weight: Bold;
+    color: var(--on_surface_variant);
+    min-width: 24px;
+    padding-left: 6px;
+}
+
+.daily-min-temp,
+.daily-max-temp {
+    font-size: 11px;
+    color: var(--on_surface_variant);
+    min-width: 16px;
+}
+
+.daily-min-temp {
+    padding-left: 6px;
+}
+
+.daily-max-temp {
+    padding-right: 6px;
+}
+
+.temp-bar {
+    background-color: alpha(var(--primary), 0.2);
+    color: var(--primary);
+    border-radius: apply(radius-m);
+}
+
+.high-temp,
+.low-temp {
+    font-size: 11px;
+}

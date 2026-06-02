@@ -1,0 +1,245 @@
+.qs-button {
+    min-width: 136px;
+    min-height: 24px;
+    background-color: var(--surface_container);
+    border-radius: apply(radius-m);
+    padding: 6px 10px;
+    transition: 0.4s ease;
+}
+.qs-button.hover {
+    background-color: var(--surface_container_high);
+}
+.qs-button label {
+    font-size: 14px;
+}
+.qs-button.active {
+    background-color: var(--primary);
+}
+.qs-button.active * {
+    color: var(--background);
+    transition: 0.4s ease;
+}
+.qs-button.active.hover {
+    background-color: mix(var(--primary), var(--on_primary_container), 0.2);
+}
+.timeout-minutes {
+    /* padding: 8px 12px; */
+    min-width: 68px;
+    background-color: var(--surface_container);
+}
+
+.timeout-label {
+    color: darker(var(--on_surface));
+    font-size: 14px;
+}
+
+.timeout-adjust-icon {
+    color: darker(var(--on_surface));
+}
+
+.timeout-adjust-button {
+    transition: 0.2s ease;
+    padding: 0px 6px;
+}
+
+.timeout-adjust-button.left {
+    background-color: var(--surface_container);
+    border-radius: apply(radius-m) 0 0 apply(radius-m);
+}
+
+.timeout-adjust-button.right {
+    background-color: var(--surface_container);
+    border-radius: 0 apply(radius-m) apply(radius-m) 0;
+}
+
+.timeout-adjust-button:hover {
+    background-color: var(--surface_container_high);
+}
+
+.timeout-adjust-button:active {
+    background-color: var(--surface_container);
+}
+
+.qs-power-profile-button.wide {
+    padding: 4px 42px;
+}
+
+.qs-button-chevron {
+    background-color: var(--surface_container);
+    border-radius: 0 apply(radius-m) apply(radius-m) 0;
+    padding: 10px;
+    transition: 0.4s ease;
+}
+.qs-button-chevron:hover {
+    background-color: var(--surface_container_high);
+}
+.qs-button-chevron.active {
+    background-color: var(--primary);
+}
+.qs-button-chevron.active:hover {
+    background-color: mix(var(--primary), var(--on_primary_container), 0.2);
+}
+.qs-button-chevron.active * {
+    color: var(--background);
+    transition: 0.4s ease;
+}
+
+.qs-button-label {
+    border-radius: apply(radius-m) 0 0 apply(radius-m);
+    min-width: 99px;
+    min-height: 14px;
+    background-color: var(--surface_container);
+    padding: 6px 10px;
+    transition: 0.4s ease;
+}
+.qs-button-label:hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-button-label.active {
+    background-color: var(--primary);
+}
+
+.qs-button-label.active:hover {
+    background-color: mix(var(--primary), var(--on_primary_container), 0.2);
+}
+
+.qs-button-label.active {
+    background-color: var(--primary);
+}
+
+.qs-button-label.active * {
+    color: var(--background);
+    transition: 0.4s ease;
+}
+
+.qs-description-label {
+    border-color: var(--background);
+    padding-left: 4px;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.qs-button-small {
+    background-color: var(--surface_container);
+    padding: 10px 28px;
+    border-radius: apply(radius-m);
+    transition: 0.4s ease;
+}
+
+.qs-button-small.hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-button-small.active {
+    background-color: var(--primary);
+}
+
+.qs-button-small.active * {
+    color: var(--background);
+}
+
+.qs-button-small.active.hover {
+    background-color: mix(var(--primary), var(--on_primary_container), 0.2);
+}
+
+.qs-power-modes-box {
+    background-color: var(--surface_container);
+    padding: 6px;
+    border-radius: apply(radius-m);
+    min-width: 144px;
+    min-height: 24px;
+}
+
+.qs-power-profile-button {
+    padding: 4px 14px;
+    border-radius: apply(radius-s);
+    transition: 0.4s ease;
+}
+
+.qs-power-profile-button.hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-power-profile-button.active {
+    background-color: var(--primary);
+}
+
+.qs-power-profile-button.active * {
+    color: var(--background);
+    transition: 0.4s ease;
+}
+
+.qs-power-profile-button.active.hover {
+    background-color: mix(var(--primary), var(--on_primary_container), 0.2);
+}
+
+.qs-device-switcher {
+    min-height: 36px;
+    min-width: 324px;
+    border-radius: apply(radius-m);
+    background-color: var(--surface_container);
+}
+
+.qs-device-switcher-button {
+    border-radius: apply(radius-m);
+    transition: background-color 0.4s ease;
+}
+
+.qs-device-switcher-button:hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-device-switcher-button.active {
+    background-color: var(--surface_container_high);
+}
+
+.qs-menu-disconnect-button {
+    background-color: var(--surface_container_high);
+    min-width: 78px;
+    min-height: 24px;
+    border-radius: apply(radius-m);
+}
+
+.qs-menu-disconnect-button label {
+    font-size: 11px;
+}
+
+.qs-checkmark-active {
+    color: var(--primary);
+    transition: color 0.2s ease;
+}
+
+.qs-checkmark-active * {
+    color: var(--primary);
+    transition: color 0.2s ease;
+}
+
+.qs-kb-menu-button {
+    min-width: 324px;
+    min-height: 88px;
+    background-color: var(--surface_container);
+    border-radius: apply(radius-m);
+    transition: background-color 0.4s ease;
+}
+
+.qs-kb-menu-button:hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-power-menu-button {
+    min-width: 159px;
+    min-height: 88px;
+    /* margin: 0px; */
+    background-color: var(--surface_container);
+    border-radius: apply(radius-m);
+    transition: background-color 0.4s ease;
+}
+
+.qs-power-menu-button:hover {
+    background-color: var(--surface_container_high);
+}
+
+.qs-power-menu-button:focus {
+    background-color: var(--surface_container_high);
+}

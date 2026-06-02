@@ -1,0 +1,50 @@
+.clock-timer-widget-button {
+    background-color: var(--surface_container);
+    padding: 10px;
+    border-radius: apply(radius-m);
+}
+
+.clock-timer-label {
+    background-color: var(--surface_container);
+    min-width: 126px;
+    min-height: 36px;
+    /* padding: 8px 8px; */
+    border-radius: apply(radius-m);
+}
+
+.world-clock-button {
+    background-color: var(--surface_container);
+    min-height: 126px;
+    padding: 18px 0px;
+    border-radius: apply(radius-m);
+    transition: background-color 0.3s ease;
+}
+
+.world-clock-button.hover {
+    background-color: var(--surface_container_high);
+}
+
+.world-clock-time {
+    font-size: 24px;
+}
+
+.laps-scroll {
+    border-radius: apply(radius-m);
+}
+
+.clock-circular-scale slider {
+    background-color: var(--primary);
+    min-height: 8px;
+    min-width: 8px;
+    border-radius: 9999px;
+}
+
+.clock-circular-scale trough {
+    background-color: alpha(var(--primary), 0.2);
+    border-width: 2px;
+}
+
+.clock-circular-scale highlight {
+    background-color: alpha(var(--primary), 0.2);
+    border-width: 6px;
+}

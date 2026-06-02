@@ -1,0 +1,43 @@
+
+spawn-at-startup "~/.config/caffyne-shell/start.sh"
+
+layer-rule {
+    match namespace="^awww-daemon$"
+
+    place-within-backdrop true
+}
+
+layer-rule {
+    match namespace="^caffyne-shell-applet$"
+    background-effect {
+        xray false
+    }
+}
+layer-rule {
+    match namespace="^caffyne-shell-notifications$"
+    background-effect {
+        xray false
+    }
+}
+layer-rule {
+    match namespace="^caffyne-shell-bar$"
+    background-effect {
+        xray false
+    }
+}
+layer-rule {
+    match namespace="^caffyne-shell-osd$"
+    background-effect {
+        xray false
+    }
+}
+
+overview {
+    workspace-shadow {
+        off
+    }
+}
+
+binds {
+    Mod+Space { spawn "fabric-cli" "exec" "caffyne-shell" "bar_manager.toggle('Dash')"; }
+}

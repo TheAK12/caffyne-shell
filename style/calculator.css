@@ -1,0 +1,52 @@
+.calculator-display {
+    background-color: var(--surface_container_high);
+    min-width: 300px;
+    padding: 6px 10px;
+    border-radius: apply(radius-m);
+}
+
+.calculator-button {
+    min-width: 76px;
+    min-height: 36px;
+    border-radius: apply(radius-m);
+}
+
+.calculator-button.digit {
+    background-color: var(--surface_container_high);
+}
+
+.calculator-button.digit:hover {
+    background-color: var(--surface_container_highest);
+}
+
+.calculator-button.digit:active {
+    background-color: var(--surface_container_high);
+}
+
+.calculator-button.operator {
+    background-color: var(--surface_container);
+}
+
+.calculator-button.operator:hover {
+    background-color: var(--surface_container_high);
+}
+
+.calculator-button.operator:active {
+    background-color: var(--surface_container);
+}
+
+.calculator-button.equals {
+    background-color: var(--primary);
+}
+
+.calculator-button.equals:hover {
+    background-color: shade(var(--primary), 1.05);
+}
+
+.calculator-button.equals:active {
+    background-color: var(--primary);
+}
+
+.calculator-button.equals * {
+    color: var(--on_primary);
+}

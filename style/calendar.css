@@ -1,0 +1,26 @@
+.calendar-header-day {
+    color: var(--on_surface_variant);
+    font-weight: 600;
+    min-height: 36px;
+    margin-bottom: -20px;
+    margin-left: -2px;
+}
+
+.calendar-month-label {
+    margin-left: 10px;
+}
+
+.calendar-day-selected {
+    background-color: var(--primary);
+    border-radius: apply(radius-m);
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.calendar-day-selected *{
+    color: var(--on_primary);
+}
+
+.calendar-day-outside *{
+    color: var(--on_surface_variant);
+}

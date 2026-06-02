@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Logs / misc
+*.log
+*.so
+config/*.json

@@ -1,0 +1,143 @@
+from fabric.widgets.box import Box
+from fabric.widgets.label import Label
+from snippets import SmoothSwitch, TimeoutAdjuster
+from .menu import QSAppletPage
+from user_options import user_options
+from services.singletons import idle, battery
+from ..buttons import PowerModes
+
+class IdleTimeoutBox(Box):
+    def __init__(
+        self,
+        label: str,
+        timeout_name: str,
+        initial_ac_minutes: int = 10,
+        initial_bat_minutes: int = 5,
+        **kwargs,
+    ):
+        self.timeout_name = timeout_name
+
+        saved = next(
+            (t for t in user_options.timeouts.list if t["name"] == timeout_name),
+            None,
+        )
+
+        self.pending_enabled = saved["enabled"]     if saved else True
+        self.pending_ac      = saved["timeout_ac"]  if saved else initial_ac_minutes
+        self.pending_bat     = saved["timeout_bat"] if saved else initial_bat_minutes
+
+        self.enabled_switch = SmoothSwitch(
+            style_classes=["smooth-switch"],
+        )
+        self.enabled_switch.set_active(self.pending_enabled)
+        self.enabled_switch.connect(
+            "notify::active",
+            lambda sw, _: setattr(self, "pending_enabled", sw.get_active()),
+        )
+
+        self.power_adjuster = TimeoutAdjuster(
+            initial_minutes=self.pending_ac,
+            icon_name="plug-duotone",
+            on_change=lambda mins: setattr(self, "pending_ac", mins),
+        )
+
+        self.bat_adjuster = TimeoutAdjuster(
+            initial_minutes=self.pending_bat,
+            icon_name="battery-vertical-full-duotone",
+            on_change=lambda mins: setattr(self, "pending_bat", mins),
+        ) if battery.available else None
+
+        super().__init__(
+            orientation="v",
+            spacing=8,
+            style_classes=["idle-timeout-box"],
+            children=[
+                Box(
+                    spacing=12,
+                    children=[
+                        Label(
+                            label=label,
+                            style_classes=["timeout-label"],
+                            h_align="start",
+                            h_expand=True,
+                        ),
+                        self.enabled_switch,
+                    ],
+                ),
+                Box(
+                    spacing=20,
+                    homogeneous=True,
+                    h_expand=True,
+                    h_align="end" if not battery.available else "center",
+                    children=[self.power_adjuster, self.bat_adjuster] if battery.available else [self.power_adjuster],
+                ),
+            ],
+            **kwargs,
+        )
+
+    def get_updated_rule(self) -> dict:
+        return {
+            "name":        self.timeout_name,
+            "timeout_ac":  int(self.pending_ac),
+            "timeout_bat": int(self.pending_bat),
+            "enabled":     self.pending_enabled,
+        }
+
+class PowerMenu(QSAppletPage):
+    def __init__(self, parent=None, stack=None, **kwargs):
+        self.stack = stack
+        self.timeout_boxes = [
+            IdleTimeoutBox(
+                label="Dim Screen",
+                timeout_name="screen-off",
+                initial_ac_minutes=10,
+                initial_bat_minutes=5,
+            ),
+            IdleTimeoutBox(
+                label="Lock",
+                timeout_name="lock",
+                initial_ac_minutes=15,
+                initial_bat_minutes=10,
+            ),
+            IdleTimeoutBox(
+                label="Suspend",
+                timeout_name="suspend",
+                initial_ac_minutes=20,
+                initial_bat_minutes=15,
+            ),
+        ]
+
+        super().__init__(
+            title="Energy",
+            stack=stack,
+            child=Box(
+                orientation="v",
+                spacing=10,
+                children=[PowerModes(wide=True)],
+            ),
+            **kwargs,
+        )
+
+        for child in self.timeout_boxes:
+            self.add(child)
+        if stack is not None:
+            stack.connect("notify::visible-child", self._on_page_change)
+        self.connect("realize", self._on_realize)
+    def _on_realize(self, *_):
+        window = self.get_toplevel()
+        if window:
+            window.connect("notify::visible", self._on_window_visibility)
+
+    def _on_window_visibility(self, window, _):
+        if not window.is_visible():
+            self._apply_settings()
+    def _on_page_change(self, *_):
+        if self.stack.get_visible_child() is self:
+            return
+        self._apply_settings()
+
+    def _apply_settings(self):
+        updated_rules = [box.get_updated_rule() for box in self.timeout_boxes]
+        user_options.timeouts.list = updated_rules
+        idle.update_rules(updated_rules)
+        user_options.save()
