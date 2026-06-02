@@ -214,17 +214,14 @@ setup_matugen() {
     local target_template="$templates_dir/caffyne-shell-colors.css"
     local source_template="$INSTALL_DIR/matugen/caffyne-shell-colors.css"
 
-    # 1. Ensure directories exist
     mkdir -p "$matugen_config_dir"
     mkdir -p "$templates_dir"
 
-    # 2. Handle config.toml initialization
     if [[ ! -f "$matugen_conf" ]]; then
         info "Initializing Matugen config.toml..."
         echo "[config]" > "$matugen_conf"
     fi
 
-    # 3. Check if the string already exists in the config
     if grep -q "\[\[templates.caffyne\]\]" "$matugen_conf"; then
         info "Matugen config entry already exists — skipping append."
     else
@@ -235,11 +232,10 @@ setup_matugen() {
 # Caffyne Shell Colors
 [templates.caffyne]
 input_path = '~/.config/matugen/templates/caffyne-shell-colors.css'
-output_path = '~/.config/caffyne-shell/styles/colors.css'
+output_path = '~/.config/caffyne-shell/style/colors.css'
 EOF
     fi
 
-    # 4. Check if the template file exists AND if it's different from our source
     if [[ -f "$target_template" ]]; then
         if cmp -s "$source_template" "$target_template"; then
             success "Matugen template is already up to date."
