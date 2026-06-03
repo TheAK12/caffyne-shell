@@ -10,11 +10,20 @@
     margin: 8px;
 }
 
-.osd-revealer {
-    /* padding: 8px; */
-    /* border: 2px solid red;; */
+.osd-updater-button {
+    padding: 8px;
+    background-color: var(--surface_container);
+    border-radius: apply(radius-m);
+    transition: background-color 0.3s ease;
+}
+.osd-updater-button:hover {
+    background-color: var(--surface_container_high);
 }
 .osd-label {
     margin-left: 10px;
     padding-bottom: 12px;
+}
+.osd-label.updater {
+    font-size: 15px;
+    margin-left: 0px;
 }

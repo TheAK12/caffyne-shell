@@ -1,65 +1,66 @@
 import subprocess
 from pathlib import Path
-import gi
-gi.require_version("Notify", "0.7")
-from gi.repository import GLib, Notify
+from gi.repository import GLib
 from loguru import logger
-
-Notify.init("caffyne-shell")
 
 REPO_PATH = Path(__file__).parent.parent
 
+_check_claimed = False
+
+
+def claim_update_check() -> bool:
+    global _check_claimed
+    if _check_claimed:
+        return False
+    _check_claimed = True
+    return True
+
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, capture_output=True, text=True, cwd=REPO_PATH)
-
-
-def check_for_updates() -> None:
-    try:
-        _run(["git", "fetch"])
-        result = _run(["git", "rev-list", "HEAD..@{u}", "--count"])
-        behind = int(result.stdout.strip())
-    except Exception as e:
-        logger.warning(f"[UpdateChecker] failed to check for updates: {e}")
-        return
-
-    if behind > 0:
-        GLib.Thread.new(None, _notify_update_available, behind)
-
-
-def _notify_update_available(commits_behind: int) -> None:
-    n = Notify.Notification.new(
-        "Shell update available",
-        f"{commits_behind} new commit{'s' if commits_behind > 1 else ''} on origin",
-        None
+    return subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=REPO_PATH,
+        timeout=10,
     )
-    n.add_action("update", "Pull update", lambda *_: _do_pull(), None)
-    n.show()
-
-def _do_pull() -> None:
-    result = _run(["git", "pull"])
-    if result.returncode == 0:
-        _notify_restart_prompt()
-    else:
-        subprocess.run([
-            "notify-send",
-            "--app-name=caffyne-shell",
-            "--urgency=critical",
-            "Shell update failed",
-            result.stderr.strip() or "git pull returned an error",
-        ])
 
 
-def _notify_restart_prompt() -> None:
-    n = Notify.Notification.new(
-        "Shell updated!",
-        "Restart to apply changes",
-        None
-    )
-    n.add_action("restart", "Restart now", lambda *_: _restart_shell(), None)
-    n.add_action("later", "Later", lambda *_: None, None)
-    n.show()
+def check_for_updates(on_update_available) -> None:
+    def _worker():
+        try:
+            _run(["git", "fetch"])
+            result = _run(["git", "rev-list", "HEAD..@{u}", "--count"])
+            behind = int(result.stdout.strip())
+        except subprocess.TimeoutExpired:
+            logger.warning("[UpdateChecker] git fetch timed out")
+            return
+        except Exception as e:
+            logger.warning(f"[UpdateChecker] failed to check for updates: {e}")
+            return
 
-def _restart_shell() -> None:
+        if behind > 0:
+            GLib.idle_add(on_update_available, behind)
+
+    GLib.Thread.new(None, _worker)
+
+
+def do_pull(on_success, on_failure) -> None:
+    def _worker():
+        try:
+            result = _run(["git", "pull"])
+            if result.returncode == 0:
+                GLib.idle_add(on_success)
+            else:
+                GLib.idle_add(on_failure, result.stderr.strip() or "git pull returned an error")
+        except subprocess.TimeoutExpired:
+            GLib.idle_add(on_failure, "git pull timed out")
+        except Exception as e:
+            GLib.idle_add(on_failure, str(e))
+
+    GLib.Thread.new(None, _worker)
+
+
+def restart_shell() -> None:
     import os, sys
     os.execv(sys.executable, [sys.executable] + sys.argv)

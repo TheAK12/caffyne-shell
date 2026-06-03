@@ -14,6 +14,8 @@ import math
 from snippets.blur.region_trace import trace_widget_regions
 from snippets.blur.blur import set_blur_regions
 from snippets.dashreveal import _ease_out_expo
+from utils.update_checker import check_for_updates, do_pull, restart_shell
+
 POWER_PROFILE_ICONS = {
     "power-saver": "leaf-duotone",
     "balanced": "scales-duotone",
@@ -27,6 +29,122 @@ POWER_PROFILE_LABELS = {
 }
 
 import bar
+
+
+class OSDUpdate(Box):
+    def __init__(self, on_dismiss=None, **kwargs):
+        self._commits_behind = 0
+        self._on_dismiss_cb = on_dismiss
+        self._icon = Icon(icon_name="shooting-star-duotone", icon_size=48)
+ 
+        self._title = Label(
+            label="Update Available",
+            h_align="center",
+            style_classes=["osd-label", "updater"],
+        )
+        self._subtitle = Label(
+            label="",
+            h_align="center",
+            style="font-size: 11px; opacity: 0.6;",
+        )
+ 
+        self._btn_primary = Button(
+            h_expand=True,
+            child=Label(label="Update"),
+            on_clicked=lambda *_: self._on_primary(),
+            style_classes=["osd-updater-button"],
+        )
+        self._btn_secondary = Button(
+            h_expand=True,
+            child=Label(label="Later"),
+            on_clicked=lambda *_: self._on_secondary(),
+            style_classes=["osd-updater-button"],
+        )
+ 
+        self._actions = Box(
+            orientation="v",
+            homogeneous=True,
+            spacing=8,
+            children=[self._btn_primary, self._btn_secondary],
+        )
+ 
+        super().__init__(
+            orientation="h",
+            spacing=12,
+            h_expand=True,
+            h_align="fill",
+            v_align="center",
+            style_classes=["osd-row"],
+            children=[
+                self._icon,
+                Box(
+                    orientation="v",
+                    spacing=2,
+                    v_align="center",
+                    h_expand=True,
+                    children=[self._title, self._subtitle],
+                ),
+                self._actions,
+            ],
+            **kwargs,
+        )
+
+    def set_update_available(self, commits_behind: int):
+        self._commits_behind = commits_behind
+        self._set_state_available()
+ 
+    def _set_state_available(self):
+        n = self._commits_behind
+        self._icon.set_property("icon-name", "shooting-star-duotone")
+        self._title.set_label("Update Available")
+        self._subtitle.set_label(f"{n} new commit{'s' if n != 1 else ''} on origin")
+        self._set_buttons("Update", "Later")
+        self._actions.set_visible(True)
+ 
+    def _set_state_updating(self):
+        self._icon.set_property("icon-name", "arrows-clockwise-duotone")
+        self._title.set_label("Updating…")
+        self._subtitle.set_label("Pulling from origin")
+        self._actions.set_visible(False)
+ 
+    def _set_state_restart(self):
+        self._icon.set_property("icon-name", "check-circle-duotone")
+        self._title.set_label("Shell Updated!")
+        self._subtitle.set_label("Restart to apply changes")
+        self._set_buttons("Restart", "Later")
+        self._actions.set_visible(True)
+ 
+    def _set_state_failed(self, error: str):
+        self._icon.set_property("icon-name", "warning-circle-duotone")
+        self._title.set_label("Update Failed")
+        self._subtitle.set_label(error[:60] + "…" if len(error) > 60 else error)
+        self._set_buttons("Retry", "Dismiss")
+        self._actions.set_visible(True)
+    def _set_buttons(self, primary: str, secondary: str):
+        self._btn_primary.get_child().set_label(primary)
+        self._btn_secondary.get_child().set_label(secondary)
+ 
+    def _on_primary(self):
+        title = self._title.get_label()
+        if title == "Update Available":
+            self._set_state_updating()
+            do_pull(
+                on_success=self._set_state_restart,
+                on_failure=self._set_state_failed,
+            )
+        elif title == "Shell Updated!":
+            restart_shell()
+        elif title == "Update Failed":
+            self._set_state_updating()
+            do_pull(
+                on_success=self._set_state_restart,
+                on_failure=self._set_state_failed,
+            )
+ 
+    def _on_secondary(self):
+        if self._on_dismiss_cb:
+            self._on_dismiss_cb()
+
 
 class OSDIcon(Box):
     def __init__(self, icon_name: str, label_text: str = "", **kwargs):
@@ -140,6 +258,7 @@ class OSD(WaylandWindow):
         self.layout_icon = OSDIcon(icon_name="keyboard-duotone", label_text="")
         self.power_icon = OSDIcon(icon_name="leaf-duotone", label_text="")
         self.alarm_icon = OSDIcon(icon_name="alarm-duotone", label_text="Alarm!")
+        self.update_widget = OSDUpdate(on_dismiss=self._start_hide)
 
         self.revealer = DashReveal(
 
@@ -155,6 +274,7 @@ class OSD(WaylandWindow):
                 self.layout_icon,
                 self.power_icon,
                 self.alarm_icon,
+                self.update_widget,
             ]),
         )
 
@@ -193,6 +313,7 @@ class OSD(WaylandWindow):
         timer.connect("alarm-triggered-signal", self._on_alarm_triggered)
 
         power_profiles.connect("changed", lambda *_: self._on_power_profile_changed())
+        self._check_for_updates()
 
     def _on_hover_enter(self, _, event):
         if event.detail == Gdk.NotifyType.INFERIOR:
@@ -270,7 +391,7 @@ class OSD(WaylandWindow):
         if bar.is_applet_open("Settings"):
             return
         if self._monitor_connector == wm.active_output:
-            for child in [self.volume_bar, self.brightness_bar, self.layout_icon, self.power_icon, self.alarm_icon]:
+            for child in [self.volume_bar, self.brightness_bar, self.layout_icon, self.power_icon, self.alarm_icon, self.update_widget]:
                 child.set_visible(child is widget)
 
             if not self.is_visible():
@@ -285,6 +406,15 @@ class OSD(WaylandWindow):
         if self._hide_timer:
             GLib.source_remove(self._hide_timer)
         self._hide_timer = GLib.timeout_add(3000, self._start_hide)
+
+    def _check_for_updates(self):
+        if self._monitor_connector == wm.active_output:
+            check_for_updates(self._on_update_available)
+        return False
+ 
+    def _on_update_available(self, commits_behind: int):
+        self.update_widget.set_update_available(commits_behind)
+        self._show_only(self.update_widget)
 
     def _apply_blur(self):
         if self._blur_ctx:
@@ -335,8 +465,6 @@ class OSD(WaylandWindow):
         return False
 
     def _start_hide(self):
-        if self._hovered:
-            return True
         self.revealer.progress_cb = None
         self.revealer.close(on_done=self._hide)
         if self._blur_ctx:

@@ -99,7 +99,6 @@ install_pacman_deps() {
         gtk3
         cairo
         libgirepository
-        libnotify
         gobject-introspection
         gtk-layer-shell
         libdbusmenu-gtk3
