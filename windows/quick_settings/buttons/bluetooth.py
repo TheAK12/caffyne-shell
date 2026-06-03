@@ -20,7 +20,7 @@ class BluetoothButton(QSButton):
             lambda obj, _: setattr(
                 self,
                 "active",
-                obj.state in ["on", "turning-on"],
+                obj.state in ["on", "discovering"],
             ),
         )
-        self.active = bluetooth.state in ["on", "turning-on"]
+        self.active = bluetooth.state in ["on", "discovering"]

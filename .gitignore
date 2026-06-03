@@ -5,6 +5,9 @@ venv/
 .env/
 .venv/
 
+style/colors.css
+style/borders.css
+
 # Logs / misc
 *.log
 *.so
