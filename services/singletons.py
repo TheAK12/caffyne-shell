@@ -1,12 +1,8 @@
 from fabric.audio.service import Audio
 from fabric.notifications import Notifications
 from fabric.bluetooth.service import BluetoothClient
-
 from fabric.power_profiles import PowerProfiles
-
-import gi
-gi.require_version("Gray", "0.1")
-from gi.repository import Gray
+from fabric.system_tray.service import SystemTray
 
 from .wm import get_wm_service
 from .battery import Battery
@@ -41,5 +37,5 @@ timer = TimerService()
 process_monitor = ProcessMonitorService()
 night_mode = NightModeService()
 recorder = RecorderService()
-watcher = Gray.Watcher()
+watcher = SystemTray()
 idle.start()

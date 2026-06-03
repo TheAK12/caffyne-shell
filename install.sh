@@ -139,7 +139,7 @@ install_aur_deps() {
 
     local aur_pkgs=(
         fabric-cli-git
-        gray-git
+        # gray-git we dont use no more
     )
 
     yay -S --needed --noconfirm "${aur_pkgs[@]}"
