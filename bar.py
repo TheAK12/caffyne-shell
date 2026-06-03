@@ -77,7 +77,7 @@ INCOMPATIBLE_GROUPS: set[frozenset] = {
     frozenset({"Settings", "Volume"}),
     frozenset({"Settings", "Keyboard"}),
     frozenset({"Settings", "Session"}),
-    frozenset({"Processes", "Apps"}),
+    frozenset({"Processes", "Launcher"}),
 }
 
 def can_group(key_a: str, key_b: str) -> bool:
