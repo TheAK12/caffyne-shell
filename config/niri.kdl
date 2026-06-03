@@ -1,5 +1,8 @@
-
 spawn-at-startup "~/.config/caffyne-shell/start.sh"
+
+layout {
+    background-color "transparent"
+}
 
 layer-rule {
     match namespace="^awww-daemon$"
@@ -45,15 +48,6 @@ layer-rule {
 layer-rule {
     match namespace="^caffyne-shell-dash$"
     background-effect {
-        saturation 1.0
-      	noise 0
-    }
-}
-
-layer-rule {
-    match namespace="^caffyne-shell-$"
-    background-effect {
-        xray false
         saturation 1.0
       	noise 0
     }
