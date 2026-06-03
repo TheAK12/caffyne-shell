@@ -10,6 +10,7 @@ from user_options import user_options
 from utils.helpers import popup_with_blur
 from gi.repository import GLib
 
+
 class TrayItem(EventBox):
     def __init__(self, item: SystemTrayItem, **kwargs):
         self._item = item
