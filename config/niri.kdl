@@ -1,12 +1,8 @@
-spawn-at-startup "~/.config/caffyne-shell/start.sh"
 
-layout {
-    background-color "transparent"
-}
+spawn-at-startup "~/.config/caffyne-shell/start.sh"
 
 layer-rule {
     match namespace="^awww-daemon$"
-
     place-within-backdrop true
 }
 
@@ -14,24 +10,52 @@ layer-rule {
     match namespace="^caffyne-shell-applet$"
     background-effect {
         xray false
+        saturation 1.0
+      	noise 0
     }
 }
+
 layer-rule {
     match namespace="^caffyne-shell-notifications$"
     background-effect {
         xray false
+        saturation 1.0
+      	noise 0
     }
 }
+
 layer-rule {
     match namespace="^caffyne-shell-bar$"
     background-effect {
         xray false
+        saturation 1.0
+      	noise 0
     }
 }
+
 layer-rule {
     match namespace="^caffyne-shell-osd$"
     background-effect {
         xray false
+        saturation 1.0
+      	noise 0
+    }
+}
+
+layer-rule {
+    match namespace="^caffyne-shell-dash$"
+    background-effect {
+        saturation 1.0
+      	noise 0
+    }
+}
+
+layer-rule {
+    match namespace="^caffyne-shell-$"
+    background-effect {
+        xray false
+        saturation 1.0
+      	noise 0
     }
 }
 
