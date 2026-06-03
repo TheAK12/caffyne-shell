@@ -2,7 +2,6 @@ from fabric.audio.service import Audio
 from fabric.notifications import Notifications
 from fabric.bluetooth.service import BluetoothClient
 from fabric.power_profiles import PowerProfiles
-from fabric.system_tray.service import SystemTray
 
 from .wm import get_wm_service
 from .battery import Battery
@@ -18,7 +17,9 @@ from .themes import ThemeService
 from .night_mode import NightModeService
 from .recorder import RecorderService
 from .bluetooth import BluetoothClient
+from .system_tray import SystemTray
 from user_options import user_options
+
 bar_manager = None
 audio = Audio()
 notifications = Notifications()

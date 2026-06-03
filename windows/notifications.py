@@ -35,7 +35,7 @@ class NotificationContainer(Box):
             revealer.close(on_done = lambda: revealer.destroy())
 
         self._window.notify_removed()
-        if len(self.get_children()) == 1:
+        if len(self.get_children()) == 0:
             self._window.set_visible(False)
 
     def _on_notified(self, nid: int):
@@ -149,10 +149,11 @@ class NotificationWidget(EventBox):
             style_classes=["notification-body"],
             visible=bool(notification.body),
         )
+        
         self.desc_label.set_xalign(0)
         self.desc_label.set_lines(2)
-        self.desc_label.set_width_chars(1)
         self.desc_label.set_size_request(-1, self.desc_label.get_layout().get_pixel_size()[1])
+
         self.content = Box(
             spacing=14,
             children=[
