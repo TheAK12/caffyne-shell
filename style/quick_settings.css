@@ -22,43 +22,6 @@
 .qs-button.active.hover {
     background-color: mix(var(--primary), var(--on_primary_container), 0.2);
 }
-.timeout-minutes {
-    /* padding: 8px 12px; */
-    min-width: 68px;
-    background-color: var(--surface_container);
-}
-
-.timeout-label {
-    color: darker(var(--on_surface));
-    font-size: 14px;
-}
-
-.timeout-adjust-icon {
-    color: darker(var(--on_surface));
-}
-
-.timeout-adjust-button {
-    transition: 0.2s ease;
-    padding: 0px 6px;
-}
-
-.timeout-adjust-button.left {
-    background-color: var(--surface_container);
-    border-radius: apply(radius-m) 0 0 apply(radius-m);
-}
-
-.timeout-adjust-button.right {
-    background-color: var(--surface_container);
-    border-radius: 0 apply(radius-m) apply(radius-m) 0;
-}
-
-.timeout-adjust-button:hover {
-    background-color: var(--surface_container_high);
-}
-
-.timeout-adjust-button:active {
-    background-color: var(--surface_container);
-}
 
 .qs-power-profile-button.wide {
     padding: 4px 42px;

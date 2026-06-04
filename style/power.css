@@ -5,12 +5,12 @@
 }
 
 .timeout-label {
-    color: darker(var(--on_surface));
+    opacity: 0.6;
     font-size: 14px;
 }
 
 .timeout-adjust-icon {
-    color: darker(var(--on_surface));
+    opacity: 0.6;
 }
 
 .timeout-adjust-button {

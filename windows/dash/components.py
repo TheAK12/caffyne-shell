@@ -28,8 +28,8 @@ class DashHeader(CenterBox):
         )
         self._entry.connect("focus-in-event", lambda *_: self._entry_box.add_style_class("focused"))
         self._entry.connect("focus-out-event", lambda *_: self._entry_box.remove_style_class("focused"))
-        self._left_box = Box(orientation="h", spacing=4)
-        self._right_box = Box(orientation="h", spacing=4)
+        self._left_box = Box(style_classes=["dash-header-button-container"], orientation="h", spacing=4)
+        self._right_box = Box(style_classes=["dash-header-button-container"], orientation="h", spacing=4)
 
         super().__init__(
             h_expand=False,

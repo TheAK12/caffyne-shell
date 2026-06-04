@@ -15,8 +15,8 @@ display = Gdk.Display.get_default()
 REVEAL_DURATION = 300
 
 _PAGE_META = {
-    "apps":   ("stack-duotone",           "applets",    "themes-wallpapers", "paint-brush-broad-duotone",       True),
-    "applets":    ("diamonds-four-duotone",       "apps",   "themes-wallpapers", "paint-brush-broad-duotone",       False),
+    "apps":   ("diamonds-four-duotone",           "applets",    "themes-wallpapers", "paint-brush-broad-duotone",       True),
+    "applets":    ("stack-duotone",       "apps",   "themes-wallpapers", "paint-brush-broad-duotone",       False),
     "wallpapers": ("images-duotone", "themes",     "apps-applets",      "dash-duotone",   True),
     "themes":     ("swatches-duotone",             "wallpapers", "apps-applets",      "dash-duotone",   False),
 }
