@@ -523,9 +523,9 @@ class WidgetWrapper(Box):
             self._popup.set_visible(False)
         try:
             Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(self))
-            self.set_visible(False)
         except Exception:
             pass
+        # GLib.idle_add(lambda: self.set_visible(False))
 
     def _on_drag_data_get(self, widget, ctx, data_obj, info, time):
         section = self._get_section()
@@ -849,7 +849,7 @@ class GroupWrapper(Box):
                 )
                 eb.connect("drag-begin", self._on_child_drag_begin)
                 eb.connect("drag-data-get", self._make_child_drag_data_get(i))
-                eb.connect("drag-end", lambda w, *_: w.set_visible(True))
+                eb.connect("drag-end", self._on_child_drag_end)
             self.add_style_class("edit-mode")
         else:
             self.drag_source_unset()
@@ -885,9 +885,16 @@ class GroupWrapper(Box):
             self._popup.set_visible(False)
         try:
             Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(widget))
-            widget.set_visible(False)
         except Exception:
             pass
+        GLib.idle_add(lambda: widget.set_visible(False))
+
+
+    def _on_child_drag_end(self, widget, ctx):
+        global _dragging_key, _dragging_widget
+        widget.set_visible(True)
+        _dragging_key = None
+        _dragging_widget = None
 
     def _make_child_drag_data_get(self, child_index: int):
         def handler(widget, ctx, data_obj, info, time):
