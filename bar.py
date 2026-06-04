@@ -182,7 +182,6 @@ class DismissLayer(Window):
         super().__init__(
             anchor="left right top bottom",
             layer="top",
-            # style="border: 2px solid red;",
             keyboard_mode="none",
             child=self.event_box,
             **kwargs,
@@ -435,8 +434,8 @@ class WidgetWrapper(Box):
         global _dragging_key, _dragging_widget
         _dragging_key = None
         _dragging_widget = None
-        self.set_visible(True)
-            
+        GLib.timeout_add(50, lambda: self.set_visible(True) or False)
+                
     def on_leave(self, w, event):
         if event.detail != Gdk.NotifyType.INFERIOR:
             w.remove_style_class("hovered")
@@ -506,6 +505,7 @@ class WidgetWrapper(Box):
                 self._drag_signals = [
                     self.connect("drag-begin", self._on_drag_begin),
                     self.connect("drag-data-get", self._on_drag_data_get),
+                    self.connect("drag-failed", self._on_drag_failed),
                 ]
             self.add_style_class("edit-mode")
         else:
@@ -520,12 +520,13 @@ class WidgetWrapper(Box):
         _dragging_key = self.widget_key
         _dragging_widget = self
         if self._popup is not None:
-            self._popup.set_visible(False)
+            GLib.idle_add(lambda: self._popup.set_visible(False))
         try:
             Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(self))
         except Exception:
+            print(Exception)
             pass
-        # GLib.idle_add(lambda: self.set_visible(False))
+        GLib.timeout_add(50, lambda: self.set_visible(False) or False)
 
     def _on_drag_data_get(self, widget, ctx, data_obj, info, time):
         section = self._get_section()
@@ -537,6 +538,13 @@ class WidgetWrapper(Box):
             return
         data_obj.set_text(f"{self._get_bar().monitor_id}:{self._get_bar().bar_index}:{section.section_name}:{index}", -1)
 
+    def _on_drag_failed(self, widget, ctx, result):
+        global _dragging_key, _dragging_widget
+        _dragging_key = None
+        _dragging_widget = None
+        self.set_visible(True)
+        return False
+        
     def _is_group_zone(self, x: int) -> bool:
         alloc = self.get_allocation()
         center = alloc.width / 2
@@ -831,16 +839,6 @@ class GroupWrapper(Box):
 
     def _apply_drag_state(self):
         if edit_mode.edit_mode:
-            self.drag_source_set(
-                Gdk.ModifierType.BUTTON1_MASK,
-                [TARGET],
-                Gdk.DragAction.MOVE,
-            )
-            if not self._drag_signals:
-                self._drag_signals = [
-                    self.connect("drag-begin", self._on_drag_begin),
-                    self.connect("drag-data-get", self._on_drag_data_get),
-                ]
             for i, eb in enumerate(self._event_boxes):
                 eb.drag_source_set(
                     Gdk.ModifierType.BUTTON1_MASK,
@@ -850,6 +848,7 @@ class GroupWrapper(Box):
                 eb.connect("drag-begin", self._on_child_drag_begin)
                 eb.connect("drag-data-get", self._make_child_drag_data_get(i))
                 eb.connect("drag-end", self._on_child_drag_end)
+                eb.connect("drag-failed", self._on_child_drag_failed)
             self.add_style_class("edit-mode")
         else:
             self.drag_source_unset()
@@ -860,41 +859,28 @@ class GroupWrapper(Box):
                 eb.drag_source_unset()
             self.remove_style_class("edit-mode")
 
-    def _on_drag_begin(self, widget, ctx):
-        global _dragging_widget
-        _dragging_widget = self
-        if self._popup is not None:
-            self._popup.set_visible(False)
-        try:
-            Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(self))
-        except Exception:
-            pass
-
-    def _on_drag_data_get(self, widget, ctx, data_obj, info, time):
-        section = self._get_section()
-        if section is None:
-            return
-        try:
-            index = section.get_children().index(self)
-        except ValueError:
-            return
-        data_obj.set_text(f"{self._get_bar().monitor_id}:{self._get_bar().bar_index}:{section.section_name}:{index}", -1)
-
     def _on_child_drag_begin(self, widget, ctx):
         if self._popup is not None:
             self._popup.set_visible(False)
         try:
-            Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(widget))
-        except Exception:
-            pass
-        GLib.idle_add(lambda: widget.set_visible(False))
+            surface = create_surface_from_widget(widget)
+            Gtk.drag_set_icon_surface(ctx, surface)
+            GLib.timeout_add(100, lambda: widget.set_visible(False) or False)
+        except Exception as e:
+            print(f"[GroupWrapper] drag icon failed: {e}")
 
-
-    def _on_child_drag_end(self, widget, ctx):
+    def _on_child_drag_failed(self, widget, ctx, result):
         global _dragging_key, _dragging_widget
         widget.set_visible(True)
         _dragging_key = None
         _dragging_widget = None
+        return False
+
+    def _on_child_drag_end(self, widget, ctx):
+        global _dragging_key, _dragging_widget
+        _dragging_key = None
+        _dragging_widget = None
+        GLib.timeout_add(150, lambda: widget.set_visible(True) or False)
 
     def _make_child_drag_data_get(self, child_index: int):
         def handler(widget, ctx, data_obj, info, time):
@@ -1601,7 +1587,6 @@ class Bar(Window):
         if self._bar_manager is None:
             return
         dash = self._bar_manager._dashes.get(self.gdk_monitor)
-        print(dash)
         if dash:
             dash.toggle_applets()
     def _on_menu_deactivate(self, _):
