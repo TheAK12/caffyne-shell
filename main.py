@@ -14,12 +14,13 @@ def apply_stylesheet(*_):
     app.set_stylesheet_from_file(
         file_path=get_relative_path("./style/style.css"),
     )
+    GLib.timeout_add(100, apply_plugin_css, app)
+
 
 style_monitor = monitor_file(get_relative_path("./style"))
 style_monitor.connect("changed", apply_stylesheet)
 
 apply_stylesheet()
-GLib.timeout_add(1000, apply_plugin_css, app)
 
 bar_manager = bar.initialise_bars()
 singletons.bar_manager = bar_manager
