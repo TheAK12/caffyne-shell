@@ -222,7 +222,7 @@ setup_matugen() {
         echo "[config]" > "$matugen_conf"
     fi
 
-    if grep -q "\[\[templates.caffyne\]\]" "$matugen_conf"; then
+    if grep -q "\[templates.caffyne\]" "$matugen_conf"; then
         info "Matugen config entry already exists — skipping append."
     else
         info "Appending Caffyne template config to matugen/config.toml..."
