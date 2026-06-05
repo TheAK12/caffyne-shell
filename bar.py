@@ -522,9 +522,14 @@ class WidgetWrapper(Box):
         try:
             Gtk.drag_set_icon_surface(ctx, create_surface_from_widget(self))
         except Exception:
-            print(Exception)
             pass
-        GLib.timeout_add(50, lambda: self.set_visible(False) or False)
+
+        def _maybe_hide():
+            if _dragging_widget is self and ctx.get_dest_window() is not None:
+                self.set_visible(False)
+            return False
+
+        GLib.idle_add(_maybe_hide)
 
     def _on_drag_data_get(self, widget, ctx, data_obj, info, time):
         section = self._get_section()
@@ -875,14 +880,22 @@ class GroupWrapper(Box):
             self.remove_style_class("edit-mode")
 
     def _on_child_drag_begin(self, widget, ctx):
+        global _dragging_key, _dragging_widget
+        _dragging_widget = widget
         if self._popup is not None:
             self._popup.set_visible(False)
         try:
             surface = create_surface_from_widget(widget)
             Gtk.drag_set_icon_surface(ctx, surface)
-            GLib.timeout_add(100, lambda: widget.set_visible(False) or False)
         except Exception as e:
             print(f"[GroupWrapper] drag icon failed: {e}")
+
+        def _maybe_hide():
+            if _dragging_widget is widget and ctx.get_dest_window() is not None:
+                widget.set_visible(False)
+            return False
+
+        GLib.idle_add(_maybe_hide)
 
     def _on_child_drag_failed(self, widget, ctx, result):
         global _dragging_key, _dragging_widget
@@ -895,7 +908,7 @@ class GroupWrapper(Box):
         global _dragging_key, _dragging_widget
         _dragging_key = None
         _dragging_widget = None
-        GLib.timeout_add(150, lambda: widget.set_visible(True) or False)
+        GLib.idle_add(lambda: widget.set_visible(True) or False)
 
     def _make_child_drag_data_get(self, child_index: int):
         def handler(widget, ctx, data_obj, info, time):
