@@ -146,14 +146,11 @@ class PowerMenu(QSAppletPage):
             stack=stack,
             child=Box(
                 orientation="v",
-                spacing=10,
-                children=[PowerModes(wide=True)],
+                spacing=12,
+                children=[PowerModes(wide=True)] + [box for box in self.timeout_boxes],
             ),
             **kwargs,
         )
-
-        for box in self.timeout_boxes:
-            self.add(box)
 
         if stack is not None:
             stack.connect("notify::visible-child", self._on_page_change)

@@ -16,7 +16,7 @@
 .launcher-search {
     background-color: var(--surface_container);
     border: 1px solid var(--outline_variant);
-    padding: 8px 10px;
+    padding: 8px 9px;
     min-width: 304px;
     border-radius: apply(radius-m);
     transition: border-color 0.3s ease;
@@ -53,8 +53,8 @@
 }
 
 .launcher-app {
-    padding: 8px 10px;
-    min-height: 24px;
+    padding: 5px 10px;
+    /* min-height: 24px; */
     border-radius: apply(radius-m);
     background-color: var(--surface_container);
     transition: 0.3s ease;
@@ -73,7 +73,7 @@
 }
 
 .launcher-grid-app {
-    min-height: 70px;
+    min-height: 72px;
     min-width: 104px;
     border-radius: apply(radius-m);
     background-color: var(--surface_container);

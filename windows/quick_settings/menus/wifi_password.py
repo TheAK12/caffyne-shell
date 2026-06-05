@@ -14,13 +14,13 @@ class PasswordState(Enum):
 
 STATE_CONFIG = {
     PasswordState.IDLE: {
-        "icon": "shield-duotone",
+        "icon": "shield-warning-duotone",
         "status": "Protected Network",
         "button": "Connect",
         "sensitive": True,
     },
     PasswordState.CONNECTING: {
-        "icon": "shield-duotone",
+        "icon": "shield-warning-duotone",
         "status": "Connecting…",
         "button": "Connecting…",
         "sensitive": False,
@@ -52,7 +52,7 @@ class WifiPasswordMenu(QSAppletPage):
             style_classes=["menu-section-title"],
             line_wrap="word",
         )
-        self._shield = Icon(icon_name="shield-duotone", icon_size=50)
+        self._shield = Icon(icon_name="shield-warning-duotone", icon_size=50)
         self._entry = Entry(
             placeholder_text="Password",
             password=True,
@@ -83,6 +83,8 @@ class WifiPasswordMenu(QSAppletPage):
             child=Box(
                 orientation="v",
                 spacing=12,
+                v_expand=True,
+                v_align="center",
                 children=[
                     self._shield,
                     self._status_label,

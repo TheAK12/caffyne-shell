@@ -254,7 +254,7 @@ class ProcessesMenu(AppletPage):
             style_classes=["applet-header-label"],
         )
 
-        self.process_list = Box(orientation="v", spacing=4)
+        self.process_list = Box(orientation="v", spacing=6)
 
         super().__init__(
             title=None,
@@ -262,25 +262,31 @@ class ProcessesMenu(AppletPage):
             stack=stack,
             child=Box(
                 orientation="v",
-                spacing=12,
+                spacing=6,
                 children=[
                     self._entry_box,
                     Box(
-                        style_classes=["process-header"],
-                        spacing=12,
+                        orientation="v",
+                        spacing=8,
                         children=[
-                            Label(label="Name", h_align="start", style="min-width: 60px; font-size: 11px; margin-left: -6px", h_expand=True),
-                            Label(label="CPU", h_align="end", style="min-width: 60px; font-size: 11px;"),
-                            Label(label="RAM", h_align="end", style="min-width: 80px; font-size: 11px;"),
-                            Box(style="min-width: 40px;"),
-                        ],
-                    ),
-                    ClippingScrolledWindow(
-                        style_classes=["scrollable"],
-                        max_content_size=(324, 276),
-                        v_expand=True,
-                        child=self.process_list,
-                    ),
+                        Box(
+                            style_classes=["process-header"],
+                            spacing=12,
+                            children=[
+                                Label(label="Name", h_align="start", style="min-width: 60px; font-size: 11px; margin-left: -6px", h_expand=True),
+                                Label(label="CPU", h_align="end", style="min-width: 60px; font-size: 11px;"),
+                                Label(label="RAM", h_align="end", style="min-width: 80px; font-size: 11px;"),
+                                Box(style="min-width: 40px;"),
+                            ],
+                        ),
+                        ClippingScrolledWindow(
+                            style_classes=["scrollable"],
+                            max_content_size=(324, 330),
+                            v_expand=True,
+                            child=self.process_list,
+                        ),
+                        ]
+                    )
                 ],
             ),
 

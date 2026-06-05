@@ -50,6 +50,7 @@ class Applet(Box):
         self._left_extra_slot = Box()
 
         self.header = CenterBox(
+            style_classes=["applet-header"],
             start_children=Box(
                 spacing=0,
                 children=[self._back_button, self._left_extra_slot, self._title_slot],

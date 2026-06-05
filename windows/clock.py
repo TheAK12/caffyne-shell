@@ -38,7 +38,7 @@ class TimezoneSearchPage(AppletPage):
         self._entry.connect("focus-out-event", lambda *_: self._entry_box.remove_style_class("focused"))
         self._list_box = Box(
             orientation="v",
-            spacing=2,
+            spacing=6,
         )
         
         self._scroll = ClippingScrolledWindow(

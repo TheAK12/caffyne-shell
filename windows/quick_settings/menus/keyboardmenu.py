@@ -1,7 +1,7 @@
 from fabric.widgets.box import Box
 from fabric.widgets.button import Button
 from fabric.widgets.label import Label
-from fabric.widgets.scrolledwindow import ScrolledWindow
+from snippets import ClippingScrolledWindow
 from .menu import QSAppletPage
 from services.singletons import wm
 
@@ -28,7 +28,8 @@ class KeyboardMenu(QSAppletPage):
         super().__init__(
             title="Keyboard",
             stack=stack,
-            child=ScrolledWindow(
+            child=ClippingScrolledWindow(
+                style_classes=["scrollable"],
                 style="min-width: 324px; min-height: 276px;",
                 max_content_size=(324, 276),
                 child=self.layouts,

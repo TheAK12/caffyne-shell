@@ -41,7 +41,7 @@ def HourlyForecastItem(hour_data: dict):
     
     return Box(
         orientation="v",
-        spacing=8,
+        spacing=4,
         style_classes=["hourly-item"],
         children=[
             Label(
@@ -146,12 +146,12 @@ class WeatherPopup(Box):
     def __init__(self, **kwargs):
         super().__init__(
             orientation="v",
-            spacing=20,
+            spacing=18,
             style_classes=["weather-popup"],
             **kwargs
         )
 
-        self._hourly_box = Box(spacing=19, style_classes=["hourly-forecast"])
+        self._hourly_box = Box(spacing=20, style_classes=["hourly-forecast"])
         self._daily_box = Box(orientation="v", spacing=12, style_classes=["daily-forecast"])
         self._temp_label = Label(
             label=f"{weather.temperature:.0f}°C" if weather.temperature else "---",
@@ -165,7 +165,7 @@ class WeatherPopup(Box):
         self.children = [
             Box(
                 orientation="v",
-                spacing=31,
+                spacing=36,
                 style_classes=["weather-main"],
                 children=[
                     self._create_current_weather(),

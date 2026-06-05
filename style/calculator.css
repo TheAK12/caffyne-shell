@@ -1,7 +1,7 @@
 .calculator-display {
     background-color: var(--surface_container_high);
-    min-width: 300px;
-    padding: 6px 10px;
+    padding: 0px 10px;
+    min-height: 60px;
     border-radius: apply(radius-m);
 }
 
@@ -39,7 +39,7 @@
     background-color: var(--primary);
 }
 
-.calculator-button.equals:hover {
+.calculator-button.equals {
     background-color: shade(var(--primary), 1.05);
 }
 

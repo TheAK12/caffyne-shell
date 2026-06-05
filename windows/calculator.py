@@ -81,7 +81,7 @@ class CalculatorApplet(Applet):
         calculator = Box(
             style_classes=["calculator"],
             orientation="v",
-            spacing=8,
+            spacing=12,
             children=[self.display, button_grid],
         )
 

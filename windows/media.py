@@ -72,7 +72,7 @@ class MediaPlayer(Box):
         )
         super().__init__(
             orientation="v",
-            spacing=16,
+            spacing=12,
             children=[
                 Overlay(
                     style_classes=["player-cover"],
@@ -194,6 +194,7 @@ class PlayerStackSwitcher(CenterBox):
         )
 
         super().__init__(
+            style_classes=["applet-header"],
             start_children=self.title,
             end_children=Box(
                 spacing=12,

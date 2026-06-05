@@ -223,7 +223,7 @@ class LauncherApplet(Applet):
 
         results = Box(
             orientation="v",
-            spacing=8,
+            spacing=12,
             children=[entry_box, self._scrolled_window],
         )
 

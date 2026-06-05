@@ -154,7 +154,7 @@ class BluetoothAdapterTab:
         self._device_items: dict[str, BluetoothDeviceItem] = {}
         self._destroyed = False
 
-        self._devices_box = Box(orientation="v", spacing=4)
+        self._devices_box = Box(orientation="v", spacing=6)
 
         self._placeholder = Box(
             style_classes=["menu-list-placeholder"],

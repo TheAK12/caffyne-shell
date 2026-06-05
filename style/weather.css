@@ -1,6 +1,6 @@
 .weather-main {
     background-color: var(--surface_container);
-    padding: 19px;
+    padding: 18px;
     border-radius: apply(radius-m);
 }
 

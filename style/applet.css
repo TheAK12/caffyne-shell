@@ -16,9 +16,13 @@
     transition: background-color 0.3s ease;
 }
 
+.applet-header {
+    min-height: 36px;
+}
+
 .applet-header-label {
     font-family: apply(mixed-mono);
-    padding: 8px 10px;
+    padding: 1px 10px 0px 10px;
     font-size: 14px;
 }
 
@@ -55,7 +59,8 @@
 }
 
 .menu-device-item {
-    padding: 9px 10px;
+    padding: 2px 10px;
+    min-height: 32px;
     background-color: var(--surface_container);
     border-radius: apply(radius-m);
     transition: background-color 0.3s ease;
