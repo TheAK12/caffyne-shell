@@ -251,7 +251,7 @@ class ProcessesMenu(AppletPage):
         self.search_entry.connect("focus-out-event", lambda *_: self._entry_box.remove_style_class("focused"))
         self.title_label = Label(
             label="Processes · 0",
-            style="padding: 10px; font-size: 14px;",
+            style="padding: 8px 10px; font-size: 14px;",
         )
 
         self.process_list = Box(orientation="v", spacing=4)
@@ -288,7 +288,7 @@ class ProcessesMenu(AppletPage):
 
         process_monitor.connect("notify::processes", self._update_process_list)
         self.search_entry.connect("changed", self._on_search_changed)
-        process_monitor.start_monitoring()
+        # process_monitor.start_monitoring()
 
         self.connect("realize", lambda *_: (parent.connect("notify::visible", self._on_visibility_changed), parent.connect("key-press-event", self._on_key_press)))
 
@@ -350,15 +350,14 @@ class ProcessMonitorApplet(Applet):
     def _on_realize(self, *_):
         self.parent.connect("show", self._on_window_show)
         self.parent.connect("hide", self._on_window_hide)
-        self.connect("notify::visible-child", self._on_stack_page_changed)
+        self._stack.connect("notify::visible-child", self._on_stack_page_changed)
         self._monitor_page.set_page_active(True)
-
         self._monitor_page.set_window_visible(self.parent.get_visible())
 
     def _on_window_show(self, *_):
         self._monitor_page.set_window_visible(True)
-        if self.get_visible_child_name() == "processes":
-            process_monitor.start_monitoring()
+        # if self.get_visible_child_name() == "processes":
+        #     process_monitor.start_monitoring()
 
     def _on_window_hide(self, *_):
         self._monitor_page.set_window_visible(False)

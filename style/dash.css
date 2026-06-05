@@ -169,7 +169,7 @@
 }
 
 .dash-header-button {
-    padding: 11px 12px;
+    padding: 9px 10px;
     border-radius: apply(radius-m);
     background-color: var(--surface_container);
     transition: background-color 0.3s ease;

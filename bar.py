@@ -19,10 +19,8 @@ from user_options import user_options
 from services.singletons import edit_mode, wm
 from windows import (
     CalculatorApplet, CalendarApplet, ClockApplet, NotificationHistoryApplet,
-    WeatherApplet, MediaApplet, QuickSettings, LauncherApplet, ProcessMonitorApplet, WifiApplet, LogoutApplet, NotificationWindow, Dash, OSD
-)
-from windows.quick_settings.menus import (
-    AudioMenu, BluetoothMenu, PowerMenu, KeyboardMenu,
+    WeatherApplet, MediaApplet, QuickSettings, LauncherApplet, ProcessMonitorApplet, WifiApplet, 
+    LogoutApplet, NotificationWindow, Dash, OSD, AudioApplet, PowerApplet, KeyboardApplet, BluetoothApplet
 )
 from snippets.popupwindow import PopupWindow
 from utils.helpers import popup_with_blur
@@ -59,14 +57,14 @@ APPLET_WIDGETS: dict[str, type] = {
     "Media":         MediaApplet,
     "Weather":       WeatherApplet,
     "Calendar":      CalendarApplet,
-    "Volume":        AudioMenu,
+    "Volume":        AudioApplet,
     "Session":       LogoutApplet,
     "Wifi":          WifiApplet,
-    "Bluetooth":     BluetoothMenu,
-    "Energy":        PowerMenu,
+    "Bluetooth":     BluetoothApplet,
+    "Energy":        PowerApplet,
     "Calculator":    CalculatorApplet,
-    "Keyboard":      KeyboardMenu,
-    "Launcher":          LauncherApplet,
+    "Keyboard":      KeyboardApplet,
+    "Launcher":      LauncherApplet,
     "Processes":     ProcessMonitorApplet,
 }
 
@@ -428,13 +426,12 @@ class WidgetWrapper(Box):
             self.event_box.connect("leave-notify-event", self.on_leave)
         edit_mode.connect("notify::edit-mode", self._on_edit_mode_changed)
         self._apply_drag_state()
-        self.connect("drag-end", lambda *_: self._clear_drag_key())
 
-    def _clear_drag_key(self):
+    def _on_drag_end(self, widget, ctx):
         global _dragging_key, _dragging_widget
         _dragging_key = None
         _dragging_widget = None
-        GLib.timeout_add(50, lambda: self.set_visible(True) or False)
+        GLib.idle_add(lambda: self.set_visible(True))
                 
     def on_leave(self, w, event):
         if event.detail != Gdk.NotifyType.INFERIOR:
@@ -506,6 +503,7 @@ class WidgetWrapper(Box):
                     self.connect("drag-begin", self._on_drag_begin),
                     self.connect("drag-data-get", self._on_drag_data_get),
                     self.connect("drag-failed", self._on_drag_failed),
+                    self.connect("drag-end", self._on_drag_end),
                 ]
             self.add_style_class("edit-mode")
         else:

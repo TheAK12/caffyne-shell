@@ -12,6 +12,7 @@ from .logout import LogoutApplet
 from .wifi import WifiApplet
 from .dash.dash import Dash
 from .osd import OSD
+from .standalone_menus import AudioApplet, PowerApplet, KeyboardApplet, BluetoothApplet
 __all__ = [
     "CalculatorApplet",
     "CalendarApplet",
@@ -27,5 +28,9 @@ __all__ = [
     "WifiApplet",
     "LogoutApplet",
     "Dash",
-    "OSD"
+    "OSD",
+    "AudioApplet",
+    "PowerApplet",
+    "KeyboardApplet",
+    "BluetoothApplet"
 ]

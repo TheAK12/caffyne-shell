@@ -17,7 +17,6 @@
     background-color: var(--surface_container);
     border: 1px solid var(--outline_variant);
     padding: 8px 10px;
-    margin-bottom: 4px;
     min-width: 304px;
     border-radius: apply(radius-m);
     transition: border-color 0.3s ease;
