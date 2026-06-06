@@ -31,7 +31,7 @@ class StreamItem(Box):
         
         super().__init__(
             orientation="v",
-            spacing=8,
+            spacing=7,
             h_expand=True, h_align="fill",
             children=[
                 Box(
@@ -65,7 +65,7 @@ class StreamItem(Box):
             self.checkmark.remove_style_class("qs-checkmark-active")
 
 def _make_output_box():
-    box = Box(orientation="v", spacing=8)
+    box = Box(orientation="v", spacing=12)
 
     def rebuild(*_):
         box.children = [StreamItem(s, False) for s in audio.speakers or []]
@@ -75,7 +75,7 @@ def _make_output_box():
     return box
 
 def _make_input_box():
-    box = Box(orientation="v", spacing=8)
+    box = Box(orientation="v", spacing=12)
 
     def rebuild(*_):
         box.children = [StreamItem(s, True) for s in audio.microphones or []]
