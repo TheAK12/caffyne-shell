@@ -431,7 +431,7 @@ class OSD(WaylandWindow):
 
     def _on_battery_changed(self, _):
         percent = battery.percent
-        charging = battery.charging
+        charging = not battery.discharging
 
         if charging and not self._last_charging:
             new_state = "charging"
