@@ -13,6 +13,7 @@ from services.wm.hyprland.service import Hyprland
 from services.wm.mango.service import Mango
 from utils.session import SESSION_MANAGER
 from gi.repository import GLib
+from utils.sounds import play_sound
 
 session_id = os.environ.get("XDG_SESSION_ID", "")
 

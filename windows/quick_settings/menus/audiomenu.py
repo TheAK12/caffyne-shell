@@ -40,6 +40,7 @@ class StreamItem(Box):
                     style_classes=["qs-description-label"],
                     label=stream.description or "",
                     max_width=250,
+                    pixels_per_second=100,
                     h_align="start",
                 )),
                 self.slider

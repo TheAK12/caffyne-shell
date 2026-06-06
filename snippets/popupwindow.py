@@ -18,7 +18,7 @@ def _get_monitor_geometry(widget: Gtk.Widget) -> tuple[int, int]:
 class PopupWindow(WaylandWindow):
     def __init__(
         self,
-        parent: WaylandWindow,
+        parent: WaylandWindow | None = None,
         pointing_to: Gtk.Widget | None = None,
         margin: tuple[int, ...] | str = "0px 0px 0px 0px",
         **kwargs,

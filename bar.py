@@ -189,7 +189,7 @@ class DismissLayer(Window):
         self.event_box.connect("button-release-event", lambda *_: on_dismiss())
 
 class AppletWindow(PopupWindow):
-    def __init__(self, applet, alignment: str = "top", **kwargs):
+    def __init__(self, applet, alignment: str = "top", standalone = False, **kwargs):
         self._keys = None
         self._blur_ctx = None
         self._alignment = alignment
@@ -218,7 +218,8 @@ class AppletWindow(PopupWindow):
 
         super().__init__(title="caffyne-shell-applet", child=self.main, **kwargs)
         self.add_keybinding("escape", lambda: self.toggle())
-        GtkLayerShell.set_exclusive_zone(self, -1)
+        if not standalone:
+            GtkLayerShell.set_exclusive_zone(self, -1)
 
     def toggle(self):
         if self.is_visible():
@@ -392,7 +393,7 @@ def _make_applet_popup(
         parent=bar,
         pointing_to=anchor_widget,
         layer="top",
-        exclusivity="none",
+        exclusivity="ignore",
         keyboard_mode="on-demand",
         style_classes=["applet-window"],
         visible=False,
@@ -1718,6 +1719,7 @@ class BarManager:
         self._notifications: dict[Gdk.Monitor, NotificationWindow] = {}
         self._dashes: dict[Gdk.Monitor, Dash] = {}
         self._osds: dict[Gdk.Monitor, OSD] = {}
+        self._fallback_popups: dict[str, AppletWindow] = {}
         self._display = Gdk.Display.get_default()
 
         for i in range(self._display.get_n_monitors()):
@@ -1734,12 +1736,19 @@ class BarManager:
         if monitor not in self._notifications:
             self._notifications[monitor] = NotificationWindow(monitor_id)
 
+        # Always create dash and OSD regardless of bar config
+        if monitor not in self._dashes:
+            self._dashes[monitor] = Dash(monitor_id, self)
+
+        if monitor not in self._osds:
+            self._osds[monitor] = OSD(monitor_id)
+
         monitor_cfg = next(
             (c for c in user_options.bars.configs if c.get("monitor") == monitor_id),
             None,
         )
         if monitor_cfg is None:
-            print(f"[BarManager] no config for monitor_id={monitor_id}, skipping")
+            print(f"[BarManager] no config for monitor_id={monitor_id}, skipping bars")
             return
 
         for bar_index, bar_cfg in enumerate(monitor_cfg["bars"]):
@@ -1759,13 +1768,6 @@ class BarManager:
             dash = self._dashes.get(monitor)
             if dash is not None:
                 new_bar.register_dash_callback(dash.applets.refresh_bar_state)
-
-        if monitor not in self._dashes:
-            monitor_bars = [bar for (m, _), bar in self._bars.items() if m == monitor]
-            self._dashes[monitor] = Dash(monitor_id, self)
-
-        if monitor not in self._osds:
-            self._osds[monitor] = OSD(monitor_id)
 
     def _remove_bar(self, monitor: Gdk.Monitor, bar_index: int = None) -> None:
         if bar_index is not None:
@@ -1799,21 +1801,39 @@ class BarManager:
     def _on_monitor_removed(self, display: Gdk.Display, monitor: Gdk.Monitor) -> None:
         self._remove_bar(monitor)
 
+
     def toggle(self, key: str):
         active_output = wm.active_output
-        for (monitor, bar_index), bar in self._bars.items():
-            if get_connector_from_monitor_id(bar.monitor_id) != active_output:
-                continue
-            if key == "Dash":
-                dash = self._dashes.get(monitor)
+
+        active_monitor = None
+        for (monitor, _), bar in self._bars.items():
+            if get_connector_from_monitor_id(bar.monitor_id) == active_output:
+                active_monitor = monitor
+                break
+
+        if active_monitor is None:
+            for monitor, dash in self._dashes.items():
+                active_monitor = monitor
+                break
+
+        if key == "Dash":
+            if active_monitor is not None:
+                dash = self._dashes.get(active_monitor)
                 if dash:
                     dash.toggle()
-                return
-            if key == "EditApplets":
-                dash = self._dashes.get(monitor)
+            return
+
+        if key == "EditApplets":
+            if active_monitor is not None:
+                dash = self._dashes.get(active_monitor)
                 if dash:
                     dash.toggle_applets()
-                return
+            return
+
+        # Search bars on active monitor for the widget
+        for (monitor, _), bar in self._bars.items():
+            if get_connector_from_monitor_id(bar.monitor_id) != active_output:
+                continue
             for section in bar.sections.values():
                 for child in section.get_children():
                     if isinstance(child, WidgetWrapper) and child.widget_key == key:
@@ -1826,7 +1846,26 @@ class BarManager:
                         if popup:
                             popup.toggle()
                         return
+
+        if key not in APPLET_WIDGETS:
             return
+
+        if key not in self._fallback_popups:
+            widget_class = APPLET_WIDGETS[key]
+            self._fallback_popups[key] = AppletWindow(
+                applet=[widget_class],
+                alignment="bottom",
+                anchor="bottom",
+                layer="top",
+                exclusivity="none",
+                keyboard_mode="on-demand",
+                style_classes=["applet-window"],
+                standalone=True,
+                visible=False,
+            )
+            self._fallback_popups[key]._keys = [key]
+
+        self._fallback_popups[key].toggle()
 
     def apply_blur(self, enabled: bool) -> None:
         for bar in self._bars.values():

@@ -1,8 +1,8 @@
 from fabric.widgets.box import Box
-from fabric.widgets.label import Label
 from fabric.widgets.image import Image
 from services.singletons import wm
 from utils.helpers import get_app_icon_name
+from snippets import ScrollingLabel
 
 FALLBACK_ICON = "application-x-executable-symbolic"
 FALLBACK_TITLE = "Desktop"
@@ -14,9 +14,8 @@ class NiriClientTitle(Box):
             icon_name=FALLBACK_ICON,
             icon_size=18,
         )
-        self.label = Label(ellipsization="end", max_chars_width=15)
+        self.label = ScrollingLabel(ellipsization="end", max_width=120, pixels_per_second=100)
 
-        self.label.set_yalign(0.55)
         wm.active_window.connect(
             "notify::app-id",
             lambda obj, _: self.icon.set_from_icon_name(

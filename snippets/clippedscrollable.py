@@ -36,6 +36,7 @@ class ClippingScrolledWindow(ScrolledWindow):
         ScrolledWindow.do_draw(self, cr)
         cr.restore()
         return True
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.connect("map", self._on_map)
