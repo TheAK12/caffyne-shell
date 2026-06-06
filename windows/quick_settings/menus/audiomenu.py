@@ -31,15 +31,17 @@ class StreamItem(Box):
         
         super().__init__(
             orientation="v",
-            spacing=6,
+            spacing=8,
             h_expand=True, h_align="fill",
             children=[
-                ScrollingLabel(
+                Box(
+                    style_classes=["audio-device-label-container"],
+                    children=ScrollingLabel(
                     style_classes=["qs-description-label"],
                     label=stream.description or "",
                     max_width=250,
                     h_align="start",
-                ),
+                )),
                 self.slider
             ],
         )
@@ -63,7 +65,7 @@ class StreamItem(Box):
             self.checkmark.remove_style_class("qs-checkmark-active")
 
 def _make_output_box():
-    box = Box(orientation="v", spacing=6)
+    box = Box(orientation="v", spacing=2)
 
     def rebuild(*_):
         box.children = [StreamItem(s, False) for s in audio.speakers or []]
@@ -73,7 +75,7 @@ def _make_output_box():
     return box
 
 def _make_input_box():
-    box = Box(orientation="v", spacing=6)
+    box = Box(orientation="v", spacing=2)
 
     def rebuild(*_):
         box.children = [StreamItem(s, True) for s in audio.microphones or []]

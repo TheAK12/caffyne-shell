@@ -114,6 +114,10 @@
     opacity: 0.6;
 }
 
+.audio-device-label-container {
+    padding: 4px;
+}
+
 .qs-button-small {
     background-color: var(--surface_container);
     padding: 10px 28px;
