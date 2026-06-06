@@ -2,7 +2,7 @@ import math
 import cairo
 from typing import cast
 from fabric.widgets.scrolledwindow import ScrolledWindow
-
+from gi.repository import GLib
 class ClippingScrolledWindow(ScrolledWindow):
     """A ScrolledWindow that respects border-radius like `overflow: hidden`."""
 
@@ -36,3 +36,10 @@ class ClippingScrolledWindow(ScrolledWindow):
         ScrolledWindow.do_draw(self, cr)
         cr.restore()
         return True
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.connect("map", self._on_map)
+
+    def _on_map(self, _):
+        self.set_overlay_scrolling(False)
+        self.set_overlay_scrolling(True)
