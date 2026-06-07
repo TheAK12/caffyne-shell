@@ -4,7 +4,7 @@ from gi.repository import Playerctl
 class MediaIcon(Icon):
     def __init__(self, player, **kwargs):
         super().__init__(
-            icon_name="play-duotone",
+            icon_name="pause-duotone" if player.props.playback_status == Playerctl.PlaybackStatus.PLAYING else "play-duotone",
             **kwargs,
         )
 

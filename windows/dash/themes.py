@@ -298,14 +298,6 @@ class ThemePreview(Box):
             ],
         )
 
-        self._opacity_label = Label(
-            label=f"{int(user_options.theme.opacity * 100)}%",
-            style_classes=["dim-label"],
-            h_align="end",
-            h_expand=True,
-            style="min-width: 36px;",
-        )
-
         self._opacity_slider = FlatScale(
             style_classes=["scale"],
             min_value=0.2,
@@ -316,7 +308,6 @@ class ThemePreview(Box):
         )
 
         self._opacity_slider.connect("button-release-event", self._on_opacity_released)
-        self._opacity_slider.connect("value-changed", self._on_opacity_changed)
 
         opacity_section = Box(
             orientation="h",
@@ -324,7 +315,6 @@ class ThemePreview(Box):
             h_align="fill",
             children=[
                 Label(label="Opacity", style_classes=["dim-label"], h_align="start", h_expand=True),
-                self._opacity_label,
                 Box(h_align="end", style="min-width: 224px;", children=[
                     self._opacity_slider,
                 ]),
@@ -474,9 +464,6 @@ class ThemePreview(Box):
     def _set_dark(self, dark: bool) -> None:
         theme_service.apply_dark(dark)
         self._update_mode_buttons(dark)
-
-    def _on_opacity_changed(self, scale) -> None:
-        self._opacity_label.set_label(f"{int(round(scale.get_value(), 2) * 100)}%")
 
     def _update_mode_buttons(self, is_dark: bool) -> None:
         if is_dark:

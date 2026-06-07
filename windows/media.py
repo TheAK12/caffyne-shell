@@ -13,12 +13,18 @@ from snippets import ClippingBox, HackedStack
 from services.singletons import player_manager
 from utils.helpers import load_blurred_pixbuf, load_scaled_pixbuf, load_cover_pixbuf
 
+def format_time(seconds: float) -> str:
+    """Helper to convert seconds into MM:SS format"""
+    mins = int(seconds) // 60
+    secs = int(seconds) % 60
+    return f"{mins:02d}:{secs:02d}"
+
+
 class MediaPlayer(Box):
     def __init__(self, name: str, service: PlayerService, applet: "MediaApplet", **kwargs):
         self.name = name
         self.service = service
         self.applet = applet
-        self._seeking = False
 
         art_path = service.get_artwork() or None
 
@@ -68,7 +74,7 @@ class MediaPlayer(Box):
             min_value=0,
             max_value=100,
             value=0,
-
+            value_formatter=lambda val: f"{format_time(val)} / {format_time(self.position_scale._max_value)}"
         )
         super().__init__(
             orientation="v",
@@ -142,20 +148,20 @@ class MediaPlayer(Box):
         service.connect("meta-change", self._on_meta_change)
         service.connect("artwork-change", self._on_artwork_change)
         service.connect("track-position", self._on_track_position)
-        self.position_scale.connect("button-press-event", lambda *_: setattr(self, "_seeking", True))
+        # self.position_scale.connect("button-press-event", lambda *_: setattr(self, "_seeking", True))
         self.position_scale.connect("button-release-event", self._on_seek_release)
 
     def _on_seek_release(self, scale, event):
-        self._seeking = False
         self.service.set_position(scale.get_value())
 
-    def _on_track_position(self, service, pos: float, dur: float):
-        if self._seeking:
+    def _on_track_position(self, service, position, total_duration=None):
+        if self.position_scale._dragging:
             return
-        if dur > 0:
 
-            self.position_scale._max_value = dur
-            self.position_scale.set_value(pos)
+        if total_duration:
+            self.position_scale._max_value = total_duration
+            
+        self.position_scale.set_value(position)
 
     def _on_meta_change(self, service, metadata, player):
         keys = metadata.keys()
