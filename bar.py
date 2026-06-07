@@ -1253,8 +1253,10 @@ class DraggableSection(Box):
         drop_index = self._drop_index_excluding_placeholder(x, y)
         self.add(new_wrapper)
         self.reorder_child(new_wrapper, drop_index)
+        play_sound("widget-placed")
         Gtk.drag_finish(ctx, True, False, time)
         self.bar.sync_config()
+        
     def _handle_applet_drop(self, key: str, x: int, y: int, ctx, time):
         if key not in BAR_WIDGETS:
             Gtk.drag_finish(ctx, False, False, time)
