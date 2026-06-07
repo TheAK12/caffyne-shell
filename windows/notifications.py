@@ -212,7 +212,7 @@ class NotificationWidget(EventBox):
                 style_classes=["notification"] if popup else ["history-notification"],
                 orientation="v",
                 spacing=4,
-                children=[self.header, self.content, actions_box],
+                children=[self.header, self.content, actions_box] if popup else [self.header, self.content],
             )
         )
 

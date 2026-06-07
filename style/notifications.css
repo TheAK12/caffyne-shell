@@ -1,7 +1,7 @@
 .notification {
     min-width: 330px;
     /* min-height: 90px; */
-    padding: 12px 12px 12px 18px;
+    padding: 18px;
     background-color: var(--background);
     border-radius: apply(radius-l);
     margin: 8px;
