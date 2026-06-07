@@ -35,7 +35,7 @@ class ConfirmPage(AppletPage):
         self._parent = parent
         self._action_label = Label(
             label="Are you sure?",
-            style="font-size: 14px;",
+            style="font-size: 16px;",
             h_align="center",
         )
         self._icon = Icon(icon_name="power-duotone", icon_size=64, v_expand=True, v_align="end")
@@ -108,7 +108,7 @@ class LogoutMenu(QSAppletPage):
         self.sign_out_button = PowerButton(
             icon_name="sign-out-duotone",
             label="Logout",
-            on_clicked=lambda *_: confirm("sign-out-duotone", "Logout?", _wm_logout),
+            on_clicked=lambda *_: confirm("sign-out-duotone", "Logout", _wm_logout),
         )
 
         super().__init__(

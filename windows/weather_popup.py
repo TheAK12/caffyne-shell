@@ -13,7 +13,7 @@ def format_hour(time_str: str) -> str:
     if "T" not in time_str:
         return time_str
     hour_24 = int(time_str.split("T")[1][:2])
-    
+
     if hour_24 == 0:
         return "12AM"
     elif hour_24 < 12:
@@ -38,7 +38,7 @@ def HourlyForecastItem(hour_data: dict):
     time_str = hour_data.get("time", "")
     temp = hour_data.get("temperature", 0)
     code = hour_data.get("weather_code", 0)
-    
+
     return Box(
         orientation="v",
         spacing=4,
@@ -114,10 +114,10 @@ def DailyForecastItem(day_data: dict, all_days: list):
     temp_max = round(day_data.get("temperature_max", 0))
     temp_min = round(day_data.get("temperature_min", 0))
     code = day_data.get("weather_code", 0)
-    
+
     global_min = min(round(day.get("temperature_min", 0)) for day in all_days) if all_days else 0
     global_max = max(round(day.get("temperature_max", 0)) for day in all_days) if all_days else 30
-    
+
     bar = TemperatureBar(temp_min, temp_max, global_min, global_max)
     bar_wrapper = Box(style="padding: 2px;", v_expand=True, v_align="center", h_expand=True)
     bar_wrapper.pack_start(bar, True, True, 0)
@@ -155,7 +155,7 @@ class WeatherPopup(Box):
         self._daily_box = Box(orientation="v", spacing=12, style_classes=["daily-forecast"])
         self._temp_label = Label(
             label=f"{weather.temperature:.0f}°C" if weather.temperature else "---",
-            style="font-size: 24px; font-weight: bold;",
+            style="font-size: 24px; font-weight: 600;",
             style_classes=["current-temp"]
         )
         self._icon = Icon(icon_name="cloud-duotone", icon_size=36, style_classes=["current-icon"])
