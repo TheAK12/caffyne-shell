@@ -3,7 +3,7 @@ from fabric.widgets.centerbox import CenterBox
 from fabric.widgets.button import Button
 from fabric.widgets.label import Label
 from fabric.widgets.grid import Grid
-from snippets import Icon, HackedStack, AnimatedScroll, StyleAwareEntry
+from snippets import Icon, HackedStack, ClippingScrolledWindow, StyleAwareEntry
 
 class DashHeader(CenterBox):
     """
@@ -128,7 +128,7 @@ class DashPage(Box):
 
     def __init__(self, grid_children):
         self.grid = DashGrid(children=grid_children)
-        self.scroll = AnimatedScroll(
+        self.scroll = ClippingScrolledWindow(
             h_expand=False,
             h_align="center",
             style_classes=["dash-grid"],
@@ -138,6 +138,7 @@ class DashPage(Box):
             overlay_scroll=True,
             kinetic_scroll=True,
         )
+        self.scroll.set_size_request(1104, 604)
         super().__init__(
             orientation="v",
             v_align="center",

@@ -1,11 +1,11 @@
 from __future__ import annotations
-
+import threading
 
 from fabric.widgets.box import Box
 from fabric.widgets.button import Button
 from fabric.widgets.label import Label
 from fabric.utils import get_relative_path
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from snippets import Icon, AnimatedScroll, ClippingBox, SmoothSwitch, FlatScale
 from services.singletons import theme_service
@@ -517,6 +517,7 @@ class DashThemePage(Box):
             overlay_scroll=True,
             kinetic_scroll=True,
         )
+        self._scroll.set_size_request(174, 630)
 
         super().__init__(
             orientation="v",
@@ -563,30 +564,35 @@ class DashThemePage(Box):
         self._unload_thumbs()
 
     def _unload_thumbs(self) -> None:
-        for child in self._thumb_strip.get_children():
-            self._thumb_strip.remove(child)
-            child.destroy()
+        # for child in self._thumb_strip.get_children():
+        #     self._thumb_strip.remove(child)
+        #     child.destroy()
         self._active_thumb = None
 
     def _load_thumbs(self) -> None:
         for child in self._thumb_strip.get_children():
-            self._thumb_strip.remove(child)
+            child.destroy()
         self._active_thumb = None
 
-        is_dark     = theme_service.is_dark
-        theme_names = theme_service.list_themes(dark=is_dark)
+        def load():
+            is_dark = theme_service.is_dark
+            theme_names = theme_service.list_themes(dark=is_dark)
+            for name in theme_names:
+                data = theme_service.load_theme_data(name, dark=is_dark)
+                if data is None:
+                    continue
+                thumb = ThemeThumb(name, data, is_dark, self._on_thumb_clicked)
+                GLib.idle_add(self._thumb_strip.add, thumb)
+                GLib.idle_add(thumb.show_all)
 
-        matugen = MatugenThumb(self._on_thumb_clicked)
+            def finish():
+                matugen = MatugenThumb(self._on_thumb_clicked)
+                self._thumb_strip.add(matugen)
+                matugen.show_all()
+                self._restore_active(theme_service.active_theme_name)
+            GLib.idle_add(finish)
 
-        for name in theme_names:
-            data = theme_service.load_theme_data(name, dark=is_dark)
-            if data is None:
-                continue
-            thumb = ThemeThumb(name, data, is_dark, self._on_thumb_clicked)
-            self._thumb_strip.add(thumb)
-        self._thumb_strip.add(matugen)
-
-        self._thumb_strip.show_all()
+        threading.Thread(target=load, daemon=True).start()
 
     def _on_thumb_clicked(self, thumb: ThemeThumb | MatugenThumb) -> None:
         self._set_active(thumb)

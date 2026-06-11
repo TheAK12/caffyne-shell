@@ -1,7 +1,7 @@
 import psutil
 from gi.repository import GLib
 from fabric.core.service import Service, Property
-
+import threading
 class ProcessMonitorService(Service):
     _instance = None
 
@@ -39,39 +39,42 @@ class ProcessMonitorService(Service):
             return
         self._monitoring = True
         self._first_update = True
-
-        psutil.cpu_percent(percpu=True)
-        for proc in psutil.process_iter():
-            try:
-                proc.cpu_percent()
-            except:
-                pass
-
-        GLib.timeout_add(200, self._start_regular_updates)
         self.notify("monitoring")
 
+        if self._processes:
+            GLib.idle_add(self.notify, "processes")
+
+        def primed_start():
+            psutil.cpu_percent(percpu=True)
+            for proc in psutil.process_iter():
+                try:
+                    proc.cpu_percent()
+                except:
+                    pass
+            import time
+            time.sleep(0.5)
+            GLib.idle_add(self._start_regular_updates)
+
+        threading.Thread(target=primed_start, daemon=True).start()
+
     def _start_regular_updates(self):
-        self._update()
-        self._timeout_id = GLib.timeout_add(self._update_interval, self._update)
+        self._do_update_threaded()
+        self._timeout_id = GLib.timeout_add(self._update_interval, self._do_update_threaded)
         return False
+
+    def _do_update_threaded(self):
+        threading.Thread(target=self._update, daemon=True).start()
+        return True
 
     def stop_monitoring(self):
         if not self._monitoring:
             return
-
         self._monitoring = False
         if self._timeout_id:
             GLib.source_remove(self._timeout_id)
             self._timeout_id = None
-
-        self._processes = []
-        self._process_cache.clear()
-        self._cpu_percents = []
         self._first_update = True
-
         self.notify("monitoring")
-        self.notify("processes")
-        self.notify("cpu-percents")
 
     def _update(self) -> bool:
         if not self._monitoring:
@@ -80,7 +83,7 @@ class ProcessMonitorService(Service):
         cpu_percents = psutil.cpu_percent(percpu=True)
         if cpu_percents != self._cpu_percents:
             self._cpu_percents = cpu_percents
-            self.notify("cpu-percents")
+            GLib.idle_add(self.notify, "cpu-percents")
 
         current_pids = set()
         structure_changed = False
@@ -141,8 +144,7 @@ class ProcessMonitorService(Service):
         self._first_update = False
 
         if structure_changed:
-            self.notify("processes")
-
+            GLib.idle_add(self.notify, "processes")
         return True
 
     def kill_process(self, pid: int):

@@ -10,6 +10,7 @@ from thefuzz import process, fuzz
 from fabric.utils import get_desktop_applications, get_relative_path, DesktopApp
 from fabric.widgets.grid import Grid
 from user_options import user_options
+import threading
 import json
 import os
 
@@ -237,10 +238,11 @@ class LauncherApplet(Applet):
         )
         self.connect("realize", self._on_realize)
         self._entry.connect("key-press-event", self._on_entry_key_press)
+        self._load_async(self._sorted_by_usage(self._all_apps[:16]), self._grid_mode)
 
     def _on_realize(self, *_):
         GLib.idle_add(lambda: self._view_stack.set_visible_child_name("grid" if self._grid_mode else "list"))
-        self._render_apps(self._sorted_by_usage(self._all_apps))
+        self._load_async(self._sorted_by_usage(self._all_apps[:16]), self._grid_mode)
         self.window.connect("notify::visible", self._on_visibility_changed)
         self.window.connect("key-press-event", self._on_key_press)
 
@@ -255,7 +257,8 @@ class LauncherApplet(Applet):
         if current_text:
             self._search(current_text)
         else:
-            self._render_apps(self._sorted_by_usage(self._all_apps))
+            self._load_async(self._sorted_by_usage(self._all_apps), self._grid_mode)
+
 
     def _on_key_press(self, _, event):
         if event.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.MOD1_MASK):
@@ -288,7 +291,6 @@ class LauncherApplet(Applet):
             self._grid_mode = user_options.launcher.grid
             self._view_toggle_icon.set_icon_name("list-duotone" if self._grid_mode else "squares-four-duotone")
             self._view_stack.set_visible_child_name("grid" if self._grid_mode else "list")
-            self._all_apps = get_desktop_applications()
             self._entry.set_text("")
             self.window.set_focus(None)
             adj = self._scrolled_window.get_vadjustment()
@@ -297,7 +299,8 @@ class LauncherApplet(Applet):
                 child.destroy()
             for child in self._grid_box.get_children():
                 child.destroy()
-            self._render_apps(self._sorted_by_usage(self._all_apps))
+        else:
+            self._load_async(self._sorted_by_usage(self._all_apps[:16]), self._grid_mode)
 
     def _sorted_by_usage(self, apps: list) -> list:
         usage = load_usage()
@@ -308,7 +311,6 @@ class LauncherApplet(Applet):
         for child in target.get_children():
             child.destroy()
         self._app_count.label = f"Apps · {len(apps)}"
-
         if self._grid_mode:
             grid = Grid(column_homogeneous=True, column_spacing=6, row_spacing=6)
             grid.attach_flow([LauncherGridItem(a, self.window) for a in apps], columns=3)
@@ -318,6 +320,22 @@ class LauncherApplet(Applet):
             for app in apps:
                 self._list_box.add(LauncherAppItem(app, self.window))
             self._list_box.show_all()
+
+    def _load_async(self, apps, grid_mode):
+        def load():
+            if grid_mode:
+                grid = Grid(column_homogeneous=True, column_spacing=6, row_spacing=6)
+                grid.attach_flow([LauncherGridItem(a, self.window) for a in apps], columns=3)
+                grid.show_all()
+                GLib.idle_add(self._grid_box.add, grid)
+            else:
+                items = [LauncherAppItem(a, self.window) for a in apps]
+                def add_items():
+                    for item in items:
+                        self._list_box.add(item)
+                    self._list_box.show_all()
+                GLib.idle_add(add_items)
+        threading.Thread(target=load, daemon=True).start()
 
     def _search(self, query: str):
         if not query:

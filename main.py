@@ -5,7 +5,6 @@ from fabric import Application
 from services.wallpaper import WallpaperService
 from services.style import StyleService
 from utils.sounds import play_sound
-
 setproctitle("caffyne-shell")
 
 app = Application("caffyne-shell")

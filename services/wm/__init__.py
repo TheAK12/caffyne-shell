@@ -33,7 +33,7 @@ def get_wm_service() -> WMService:
     if os.getenv("NIRI_SOCKET"):
         from .niri.service import Niri
         _wm_instance = Niri()
-
+        # _wm_instance = None
     elif os.getenv("HYPRLAND_INSTANCE_SIGNATURE"):
         from .hyprland.service import Hyprland
         _wm_instance = Hyprland()

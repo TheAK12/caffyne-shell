@@ -112,6 +112,7 @@ class DashLauncherPage(DashPage):
             self._render_apps(self._sorted_by_usage(self._all_apps))
             adj = self.scroll.get_vadjustment()
             adj.set_value(adj.get_lower())
+            
     def _sorted_by_usage(self, apps: list) -> list:
         usage = load_usage()
         return sorted(apps, key=lambda a: get_usage_count(a, usage), reverse=True)

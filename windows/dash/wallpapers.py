@@ -2,6 +2,8 @@ import os
 import gc
 import hashlib
 import weakref
+import threading
+
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, Future
 
@@ -322,24 +324,25 @@ class DashWallpaperPage(DashSelectorPage):
         if not os.path.isdir(walls_dir):
             return
 
-        paths = sorted(
-            os.path.join(walls_dir, f)
-            for f in os.listdir(walls_dir)
-            if f.lower().endswith(SUPPORTED_EXTS)
-        )
+        def load():
+            paths = sorted(
+                os.path.join(walls_dir, f)
+                for f in os.listdir(walls_dir)
+                if f.lower().endswith(SUPPORTED_EXTS)
+            )
+            def apply():
+                for path in paths:
+                    thumb = WallpaperThumb(path, self._on_thumb_clicked)
+                    self._thumb_strip.add(thumb)
+                self._thumb_strip.show_all()
+                adj = self._scroll.get_vadjustment()
+                adj.connect("value-changed", self._on_scroll_changed)
+                GLib.idle_add(self._on_scroll_changed, adj)
+                self._walls_monitor = monitor_file(walls_dir)
+                self._walls_monitor.connect("changed", self._on_dir_changed)
+            GLib.idle_add(apply)
 
-        for path in paths:
-            thumb = WallpaperThumb(path, self._on_thumb_clicked)
-            self._thumb_strip.add(thumb)
-
-        self._thumb_strip.show_all()
-
-        adj = self._scroll.get_vadjustment()
-        adj.connect("value-changed", self._on_scroll_changed)
-        GLib.idle_add(self._on_scroll_changed, adj)
-
-        self._walls_monitor = monitor_file(walls_dir)
-        self._walls_monitor.connect("changed", self._on_dir_changed)
+        threading.Thread(target=load, daemon=True).start()
 
     def _on_dir_changed(self, monitor, file, other_file, event_type) -> None:
         path = file.get_path()

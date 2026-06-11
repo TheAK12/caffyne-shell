@@ -7,7 +7,7 @@ from snippets import Applet, AppletPage, Icon, ClippingBox, ClippingScrolledWind
 from gi.repository import GLib, Gdk
 from services.singletons import process_monitor
 from snippets import Graph
-
+import threading
 class SystemMonitorGraph(Graph):
     def __init__(self, dynamic: bool, overlayed: bool = False):
         super().__init__(
@@ -109,65 +109,75 @@ class ProcessMonitorPage(AppletPage):
     def _sync_update(self):
         should_run = self._window_visible and self._page_active
         if should_run and self._update_id is None:
+            self._update()
             self._update_id = GLib.timeout_add(1000, self._update)
         elif not should_run and self._update_id is not None:
             GLib.source_remove(self._update_id)
             self._update_id = None
 
     def _update(self):
+        def collect():
+            cpu_percent = psutil.cpu_percent()
+            temps = psutil.sensors_temperatures()
+            ram = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            current_time = GLib.get_monotonic_time()
+            current_net_io = psutil.net_io_counters()
+            return cpu_percent, temps, ram, disk, current_time, current_net_io
 
-        cpu_percent = psutil.cpu_percent()
-        self.cpu_temp_overlay.graph1.push(cpu_percent)
-        self.cpu_temp_overlay.metric1_label.set_label(f"{cpu_percent}%")
+        def apply(data):
+            cpu_percent, temps, ram, disk, current_time, current_net_io = data
 
-        temps = psutil.sensors_temperatures()
-        if "coretemp" in temps:
-            temp = temps["coretemp"][0].current
-            self.cpu_temp_overlay.graph2.push(temp)
-            self.cpu_temp_overlay.metric2_label.set_label(f"{temp}°C")
+            self.cpu_temp_overlay.graph1.push(cpu_percent)
+            self.cpu_temp_overlay.metric1_label.set_label(f"{cpu_percent}%")
 
-        ram = psutil.virtual_memory()
-        ram_used_gb = ram.used / (1024 ** 3)
-        ram_total_gb = ram.total / (1024 ** 3)
-        self.ram_disk_overlay.graph1.push(ram.percent)
-        self.ram_disk_overlay.metric1_extra_label.set_label(f"{ram_used_gb:.1f}/{ram_total_gb:.0f}GB")
-        self.ram_disk_overlay.metric1_label.set_label(f"{ram.percent}%")
+            if "coretemp" in temps:
+                temp = temps["coretemp"][0].current
+                self.cpu_temp_overlay.graph2.push(temp)
+                self.cpu_temp_overlay.metric2_label.set_label(f"{temp}°C")
 
-        disk = psutil.disk_usage('/')
-        disk_used_gb = disk.used / (1024 ** 3)
-        disk_total_gb = disk.total / (1024 ** 3)
-        self.ram_disk_overlay.graph2.push(disk.percent)
-        self.ram_disk_overlay.metric2_extra_label.set_label(f"{disk_used_gb:.0f}/{disk_total_gb:.0f}GB")
-        self.ram_disk_overlay.metric2_label.set_label(f"{disk.percent}%")
+            ram_used_gb = ram.used / (1024 ** 3)
+            ram_total_gb = ram.total / (1024 ** 3)
+            self.ram_disk_overlay.graph1.push(ram.percent)
+            self.ram_disk_overlay.metric1_extra_label.set_label(f"{ram_used_gb:.1f}/{ram_total_gb:.0f}GB")
+            self.ram_disk_overlay.metric1_label.set_label(f"{ram.percent}%")
 
-        current_time = GLib.get_monotonic_time()
-        current_net_io = psutil.net_io_counters()
-        time_delta = (current_time - self.prev_time) / 1_000_000
+            disk_used_gb = disk.used / (1024 ** 3)
+            disk_total_gb = disk.total / (1024 ** 3)
+            self.ram_disk_overlay.graph2.push(disk.percent)
+            self.ram_disk_overlay.metric2_extra_label.set_label(f"{disk_used_gb:.0f}/{disk_total_gb:.0f}GB")
+            self.ram_disk_overlay.metric2_label.set_label(f"{disk.percent}%")
 
-        if time_delta > 0:
-            download_speed = (current_net_io.bytes_recv - self.prev_net_io.bytes_recv) / time_delta
-            upload_speed = (current_net_io.bytes_sent - self.prev_net_io.bytes_sent) / time_delta
+            time_delta = (current_time - self.prev_time) / 1_000_000
+            if time_delta > 0:
+                download_speed = (current_net_io.bytes_recv - self.prev_net_io.bytes_recv) / time_delta
+                upload_speed = (current_net_io.bytes_sent - self.prev_net_io.bytes_sent) / time_delta
 
-            def format_speed(bps):
-                if bps < 1024: return f"{bps:.0f} B/s"
-                elif bps < 1024 ** 2: return f"{bps / 1024:.1f} KB/s"
-                elif bps < 1024 ** 3: return f"{bps / (1024 ** 2):.1f} MB/s"
-                else: return f"{bps / (1024 ** 3):.2f} GB/s"
+                def format_speed(bps):
+                    if bps < 1024: return f"{bps:.0f} B/s"
+                    elif bps < 1024 ** 2: return f"{bps / 1024:.1f} KB/s"
+                    elif bps < 1024 ** 3: return f"{bps / (1024 ** 2):.1f} MB/s"
+                    else: return f"{bps / (1024 ** 3):.2f} GB/s"
 
-            max_speed_mbps = 100
-            self.network_overlay.graph1.push(min((download_speed / (1024 ** 2)) / max_speed_mbps * 100, 100))
-            self.network_overlay.graph2.push(min((upload_speed / (1024 ** 2)) / max_speed_mbps * 100, 100))
-            self.network_overlay.metric1_label.set_label(format_speed(download_speed))
-            self.network_overlay.metric2_label.set_label(format_speed(upload_speed))
+                max_speed_mbps = 100
+                self.network_overlay.graph1.push(min((download_speed / (1024 ** 2)) / max_speed_mbps * 100, 100))
+                self.network_overlay.graph2.push(min((upload_speed / (1024 ** 2)) / max_speed_mbps * 100, 100))
+                self.network_overlay.metric1_label.set_label(format_speed(download_speed))
+                self.network_overlay.metric2_label.set_label(format_speed(upload_speed))
 
-        self.prev_net_io = current_net_io
-        self.prev_time = current_time
+            self.prev_net_io = current_net_io
+            self.prev_time = current_time
+
+        def run():
+            data = collect()
+            GLib.idle_add(apply, data)
+
+        threading.Thread(target=run, daemon=True).start()
         return True
 
 class ProcessMenuItem(Box):
     def __init__(self, process_dict):
         self.process_dict = process_dict
-        self._update_id = None
 
         self.name_label = Label(
             label=process_dict['name'],
@@ -191,13 +201,7 @@ class ProcessMenuItem(Box):
             style_classes=["menu-device-item"],
             spacing=12,
             children=[
-                Box(
-                    spacing=8,
-                    h_expand=True,
-                    children=[
-                        self.name_label,
-                    ],
-                ),
+                Box(spacing=8, h_expand=True, children=[self.name_label]),
                 self.cpu_label,
                 self.mem_label,
                 Button(
@@ -208,20 +212,10 @@ class ProcessMenuItem(Box):
             ],
         )
 
-        self._update_id = GLib.timeout_add(1000, self._update_values)
-
-    def _update_values(self):
-        try:
-            self.cpu_label.set_label(f"{self.process_dict['cpu_percent']}%")
-            self.mem_label.set_label(self._format_memory(self.process_dict['memory_mb']))
-            return True
-        except:
-            return False
-
-    def cleanup(self):
-        if self._update_id:
-            GLib.source_remove(self._update_id)
-            self._update_id = None
+    def update(self, process_dict):
+        self.process_dict = process_dict
+        self.cpu_label.set_label(f"{process_dict['cpu_percent']}%")
+        self.mem_label.set_label(self._format_memory(process_dict['memory_mb']))
 
     def _format_memory(self, mb):
         if mb >= 1024: return f"{mb / 1024:.1f}GB"
@@ -324,25 +318,39 @@ class ProcessesMenu(AppletPage):
         self._update_process_list()
 
     def _update_process_list(self, *_):
-        processes = process_monitor.processes
+        processes = list(process_monitor.processes)
+        search_text = self._search_text
 
-        filtered = (
-            [p for p in processes if self._search_text in p['name'].lower()]
-            if self._search_text else processes
-        )
+        def work():
+            filtered = (
+                [p for p in processes if search_text in p['name'].lower()]
+                if search_text else processes
+            )
+            GLib.idle_add(apply, filtered)
 
-        self.title_label.set_label(f"Processes · {len(filtered)}")
+        def apply(filtered):
+            self.title_label.set_label(f"Processes · {len(filtered)}")
 
-        current_pids = {p['pid'] for p in filtered}
-        for pid in [pid for pid in self._process_widgets if pid not in current_pids]:
-            self._process_widgets[pid].cleanup()
-            del self._process_widgets[pid]
+            current_pids = {p['pid'] for p in filtered}
 
-        for proc in filtered:
-            if proc['pid'] not in self._process_widgets:
-                self._process_widgets[proc['pid']] = ProcessMenuItem(proc)
+            for pid in list(self._process_widgets):
+                if pid not in current_pids:
+                    widget = self._process_widgets.pop(pid)
+                    self.process_list.remove(widget)
 
-        self.process_list.children = [self._process_widgets[p['pid']] for p in filtered]
+            for i, proc in enumerate(filtered):
+                pid = proc['pid']
+                if pid in self._process_widgets:
+                    self._process_widgets[pid].update(proc)
+                    self.process_list.reorder_child(self._process_widgets[pid], i)
+                else:
+                    widget = ProcessMenuItem(proc)
+                    self._process_widgets[pid] = widget
+                    self.process_list.add(widget)
+                    self.process_list.reorder_child(widget, i)
+                    widget.show()
+
+        threading.Thread(target=work, daemon=True).start()
 
 class ProcessMonitorApplet(Applet):
     def __init__(self, parent, **kwargs):

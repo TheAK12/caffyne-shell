@@ -10,6 +10,7 @@ gi.require_version("GdkPixbuf", "2.0")
 from PIL import Image as PILImage, ImageFilter
 from gi.repository import GLib, Gdk, Gtk, GtkLayerShell, GdkPixbuf
 from fabric.core.service import Service, Signal, Property
+from fabric.widgets.eventbox import EventBox
 from fabric.widgets.wayland import WaylandWindow
 from loguru import logger
 from user_options import user_options
@@ -81,9 +82,7 @@ class WallpaperDropWindow(WaylandWindow):
 
     def __init__(self, monitor_id: int) -> None:
         self._monitor_id = monitor_id
-        self._box = Gtk.Box()
-        self._box.set_hexpand(True)
-        self._box.set_vexpand(True)
+        self._box = EventBox(h_expand=True, v_expand=True)
         self.bar_manager = None
 
         super().__init__(
@@ -98,8 +97,7 @@ class WallpaperDropWindow(WaylandWindow):
 
         self.show_all()
         GtkLayerShell.set_exclusive_zone(self, -1)
-        self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        self.connect("button-press-event", self._on_button_press)
+        self._box.connect("button-press-event", self._on_button_press)
         self._setup_drag_and_drop()
 
     def _on_button_press(self, widget, event: Gdk.EventButton):
