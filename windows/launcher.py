@@ -13,8 +13,7 @@ from user_options import user_options
 import json
 import os
 
-USAGE_FILE = get_relative_path("../config/launcher_usage.json")
-
+USAGE_FILE = os.path.expanduser("~/.config/caffyne-shell/config/launcher_usage.json")
 def load_usage() -> dict:
     try:
         with open(USAGE_FILE, "r") as f:
