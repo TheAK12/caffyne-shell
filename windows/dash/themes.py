@@ -477,6 +477,7 @@ class ThemePreview(Box):
         values = RADIUS_MAP[key]
         css = "\n".join(f"@define {k} {v};" for k, v in values.items())
         path = os.path.expanduser("~/.config/caffyne-shell/style/borders.css")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(css + "\n")
 
@@ -484,6 +485,7 @@ class ThemePreview(Box):
         values = FONT_MAP[key]
         css = "\n".join(f"@define {k} {v};" for k, v in values.items())
         path = os.path.expanduser("~/.config/caffyne-shell/style/fonts.css")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(css + "\n")
 
