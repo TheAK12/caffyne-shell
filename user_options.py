@@ -88,7 +88,7 @@ class UserOptions:
 
     class Wallpaper:
         def __init__(self):
-            self.path = f"{get_relative_path('wallpapers/Ventura-dark.jpg')}"
+            self.path = os.path.expanduser("~/.config/caffyne-shell/wallpapers/Ventura-dark.jpg")
 
     class Dock:
         def __init__(self):
@@ -127,7 +127,7 @@ class UserOptions:
 
     class Wallpaper:
         def __init__(self):
-            self.path = f"{get_relative_path('wallpapers/wall14.jpg')}"
+            self.path = os.path.expanduser("~/.config/caffyne-shell/wallpapers/wall14.jpg")
 
     def __init__(self):
         self.user = self.User()

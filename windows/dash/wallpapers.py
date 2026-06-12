@@ -318,7 +318,7 @@ class DashWallpaperPage(DashSelectorPage):
         self._preview_image.set_from_pixbuf(None)
 
     def _load_wallpapers(self) -> None:
-        walls_dir = get_relative_path("../../wallpapers")
+        walls_dir = os.path.expanduser("~/.config/caffyne-shell/wallpapers")
         if not os.path.isdir(walls_dir):
             return
 
